@@ -4,16 +4,16 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 
-namespace CrowdControl.Games.Packs.SRB2
+namespace CrowdControl.Games.Packs.SonicRoboBlast2
 {
     [UsedImplicitly]
-    class SRB2 : FileEffectPack
+    class SonicRoboBlast2 : FileEffectPack
     {
         public override string ReadFile => "/luafiles/client/crowd_control/output.txt"; //GameFolder + "/luafiles/client/crowd_control/output.txt";
         public override string WriteFile => "/luafiles/client/crowd_control/input.txt"; //GameFolder + "/luafiles/client/crowd_control/input.txt";
         public static string ReadyCheckFile = "/luafiles/client/crowd_control/connector.txt"; //GameFolder + "/luafiles/client/crowd_control/connector.txt";
 
-        public override Game Game => new("Sonic Robo Blast 2", "SRB2", "PC", ConnectorType.FileConnector);
+        public override Game Game => new("Sonic Robo Blast 2", "SonicRoboBlast2", "PC", ConnectorType.FileConnector);
 
         public override EffectList Effects
         {
@@ -43,7 +43,7 @@ namespace CrowdControl.Games.Packs.SRB2
             }
         }
 
-        public SRB2(UserRecord player, Func<CrowdControlBlock, bool> responseHandler, Action<object> statusUpdateHandler) : base(player, responseHandler, statusUpdateHandler)
+        public SonicRoboBlast2(UserRecord player, Func<CrowdControlBlock, bool> responseHandler, Action<object> statusUpdateHandler) : base(player, responseHandler, statusUpdateHandler)
         {
         }
 
