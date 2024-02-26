@@ -1,0 +1,1 @@
+Version checker for the libraries originally from TehRealSalt's vectorlib in their Gamma character mod.
