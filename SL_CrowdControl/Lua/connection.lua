@@ -52,7 +52,7 @@ local function handle_message(msg)
 			if effect == nil or not (getmetatable(effect) == CCEffect.Meta) then
 				print("Couldn't find effect '"..code.."'!")
 				create_response(id, UNAVAILABLE)
-			elseif effect.ready() or (effect.is_timed and running_effects[effect.code] == nil) then
+			elseif (not effect.is_timed and effect.ready()) or (effect.is_timed and (running_effects[effect.code] == nil)) then
 				print(tostring(msg["viewer"]).." activated effect '"..code.."'!")
 				local quantity = msg["quantity"]
 				if quantity == nil or quantity == 0 then
