@@ -202,11 +202,15 @@ end, default_ready)
 effects["sneakers"] = CCEffect.New("sneakers", function(t)
 	consoleplayer.powers[pw_sneakers] = sneakertics
 	P_PlayJingle(consoleplayer, JT_SHOES)
-end, default_ready)
+end, function()
+	return default_ready() and (consoleplayer.powers[pw_sneakers] == 0)
+end)
 effects["invulnerability"] = CCEffect.New("invulnerability", function(t)
 	consoleplayer.powers[pw_invulnerability] = invulntics
 	P_PlayJingle(consoleplayer, JT_INV)
-end, default_ready)
+end, function()
+	return default_ready() and (consoleplayer.powers[pw_invulnerability] == 0)
+end)
 
 effects["nojump"] = CCEffect.New("nojump", function(t)
 	consoleplayer.cmd.buttons = consoleplayer.cmd.buttons & ~BT_JUMP
