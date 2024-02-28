@@ -26,10 +26,21 @@ namespace CrowdControl.Games.Packs.SonicRoboBlast2
                     new Effect("Give Life", "givelife") { Price = 100, Description = "Give the player an extra life." },
                     new Effect("Kill", "kill") { Price = 200, Description = "Take a life from the player." },
                     new Effect("Slap", "slap") { Price = 25, Description = "Give the player a good slap" },
+                    new Effect("Give Speedshoes", "sneakers") { Price = 25, Description = "Give the player a pair of speed shoes. Gotta go fast!" },
+                    new Effect("Give Invincibility", "invulnerability") { Price = 25, Description = "Give the player invincibility. How nice of you." },
 
                     new Effect("Disable Jump", "nojump") { Duration = 15, Price = 50, Category = "Controls", Description = "Disables the player's jump button." },
                     new Effect("Disable Spin", "nospin") { Duration = 15, Price = 50, Category = "Controls", Description = "Disables the player's spin button." },
                     new Effect("Invert Controls", "invertcontrols") { Duration = 15, Price = 50, Category = "Controls", Description = "Inverts the player's controls." },
+
+                    new Effect("Spawn Crawla", "crawla") { Price = 10, Category = "Enemies", Description = "Spawns a Crawla around the player." },
+                    new Effect("Spawn Rosy", "rosy") { Price = 10, Category = "Enemies", Description = "Spawns Amy to hug the player." },
+                    new Effect("Spawn Crawla Commander", "commander") { Price = 50, Category = "Enemies", Description = "Spawns a Crawla Commander around the player." },
+
+                    new Effect("Give Pity Shield", "pityshield") { Price = 10, Category = "Shields", Description = "Grants the player a basic shield." },
+                    new Effect("Give Fire Shield", "fireshield") { Price = 10, Category = "Shields", Description = "Grants the player a fire shield." },
+                    new Effect("Give Bubble Shield", "bubbleshield") { Price = 10, Category = "Shields", Description = "Grants the player a bubble shield. BWAOH" },
+                    new Effect("Give Lightning Shield", "lightningshield") { Price = 10, Category = "Shields", Description = "Grants the player a fire shield." },
 
                     new Effect("Change to Sonic", "changesonic") { Price = 10, Category = "Characters", Description = "Sets the player character to Sonic." },
                     new Effect("Change to Tails", "changetails") { Price = 10, Category = "Characters", Description = "Sets the player character to Tails." },

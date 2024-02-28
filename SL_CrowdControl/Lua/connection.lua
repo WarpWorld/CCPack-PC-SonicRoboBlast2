@@ -52,7 +52,7 @@ local function handle_message(msg)
 			if effect == nil or not (getmetatable(effect) == CCEffect.Meta) then
 				print("Couldn't find effect '"..code.."'!")
 				create_response(id, UNAVAILABLE)
-			elseif (not effect.is_timed and effect.ready()) or (effect.is_timed and (running_effects[effect.code] == nil)) then
+			elseif effect.ready() and (not effect.is_timed or (effect.is_timed and (running_effects[effect.code] == nil))) then
 				print(tostring(msg["viewer"]).." activated effect '"..code.."'!")
 				local quantity = msg["quantity"]
 				if quantity == nil or quantity == 0 then
@@ -180,7 +180,10 @@ end
 end, default_ready)*/
 effects["bumper"] = CCEffect.New("bumper", function(t)
 	local player = consoleplayer
-	local mobj = P_SpawnMobj(player.mo.x + player.mo.momx, player.mo.y + player.mo.momx, player.mo.z + player.mo.momz, MT_BUMPER)
+	local x = player.mo.x + player.mo.momx + P_RandomRange(-16, 16) * FRACUNIT
+	local y = player.mo.y + player.mo.momy + P_RandomRange(-16, 16) * FRACUNIT
+	local z = player.mo.z + player.mo.momz + P_RandomRange(-8, 8) * FRACUNIT
+	local mobj = P_SpawnMobj(x, y, z, MT_BUMPER)
 	table.insert(bumpers, {["bumper"]=mobj,["timer"]=0})
 end, default_ready)
 effects["giverings"] = CCEffect.New("giverings", function(t)
@@ -196,6 +199,14 @@ end, default_ready)
 effects["slap"] = CCEffect.New("slap", function(t)
 	P_DoPlayerPain(consoleplayer, consoleplayer.mo, consoleplayer.mo)
 end, default_ready)
+effects["sneakers"] = CCEffect.New("sneakers", function(t)
+	consoleplayer.powers[pw_sneakers] = sneakertics
+	P_PlayJingle(consoleplayer, JT_SHOES)
+end, default_ready)
+effects["invulnerability"] = CCEffect.New("invulnerability", function(t)
+	consoleplayer.powers[pw_invulnerability] = invulntics
+	P_PlayJingle(consoleplayer, JT_INV)
+end, default_ready)
 
 effects["nojump"] = CCEffect.New("nojump", function(t)
 	consoleplayer.cmd.buttons = consoleplayer.cmd.buttons & ~BT_JUMP
@@ -206,8 +217,53 @@ end, default_ready, 15 * TICRATE)
 effects["invertcontrols"] = CCEffect.New("invertcontrols", function(t)
 	consoleplayer.cmd.forwardmove = -consoleplayer.cmd.forwardmove
 	consoleplayer.cmd.sidemove = -consoleplayer.cmd.sidemove
-	consoleplayer.cmd.angleturn = -consoleplayer.cmd.angleturn
 end, default_ready, 15 * TICRATE)
+
+effects["crawla"] = CCEffect.New("crawla", function(t)
+	local play_mo = consoleplayer.mo
+	local x = play_mo.x + play_mo.momx + P_RandomRange(-256, 256) * FRACUNIT
+	local y = play_mo.y + play_mo.momy + P_RandomRange(-256, 256) * FRACUNIT
+	local z = play_mo.z + play_mo.momz
+	local mobj = P_SpawnMobj(x, y, z, MT_BLUECRAWLA)
+	-- flip with player grav
+	mobj.eflags = $ | play_mo.eflags & MFE_VERTICALFLIP
+end, default_ready)
+effects["rosy"] = CCEffect.New("rosy", function(t)
+	local play_mo = consoleplayer.mo
+	local x = play_mo.x + play_mo.momx + P_RandomRange(-128, 128) * FRACUNIT
+	local y = play_mo.y + play_mo.momy + P_RandomRange(-128, 128) * FRACUNIT
+	local z = play_mo.floorz + play_mo.momz
+	if not (play_mo.eflags & MFE_VERTICALFLIP == 0) then
+		z = play_mo.ceilingz + play_mo.momz
+	end
+	local mobj = P_SpawnMobj(x, y, z, MT_ROSY)
+end, default_ready)
+effects["commander"] = CCEffect.New("commander", function(t)
+	local play_mo = consoleplayer.mo
+	local x = play_mo.x + play_mo.momx + P_RandomRange(-256, 256) * FRACUNIT
+	local y = play_mo.y + play_mo.momy + P_RandomRange(-256, 256) * FRACUNIT
+	local z = play_mo.z + play_mo.momz
+	local mobj = P_SpawnMobj(x, y, z, MT_CRAWLACOMMANDER)
+	-- flip with player grav
+	mobj.eflags = $ | play_mo.eflags & MFE_VERTICALFLIP
+end, default_ready)
+
+effects["pityshield"] = CCEffect.New("pityshield", function(t)
+	consoleplayer.powers[pw_shield] = SH_PITY
+	P_SpawnShieldOrb(consoleplayer)
+end, default_ready)
+effects["fireshield"] = CCEffect.New("pityshield", function(t)
+	consoleplayer.powers[pw_shield] = SH_FLAMEAURA
+	P_SpawnShieldOrb(consoleplayer)
+end, default_ready)
+effects["bubbleshield"] = CCEffect.New("pityshield", function(t)
+	consoleplayer.powers[pw_shield] = SH_BUBBLEWRAP
+	P_SpawnShieldOrb(consoleplayer)
+end, default_ready)
+effects["lightningshield"] = CCEffect.New("pityshield", function(t)
+	consoleplayer.powers[pw_shield] = SH_THUNDERCOIN
+	P_SpawnShieldOrb(consoleplayer)
+end, default_ready)
 
 effects["changesonic"] = CCEffect.New("changesonic", function(t)
 	consoleplayer.mo.skin = "sonic"
