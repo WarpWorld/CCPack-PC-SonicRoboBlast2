@@ -172,7 +172,7 @@ addHook("GameQuit", on_game_quit)
 
 local function default_ready()
 	-- only run while in a level, not paused and not exiting a stage
-	return gamestate == GS_LEVEL and not paused and not (consoleplayer == nil) and not (consoleplayer.exiting > 0)
+	return gamestate == GS_LEVEL and not paused and not (consoleplayer == nil) and (consoleplayer.playerstate == PST_LIVE) and not (consoleplayer.exiting > 0)
 end
 
 /*effects["demo"] = CCEffect.New("demo", function(t)
@@ -193,8 +193,14 @@ effects["givelife"] = CCEffect.New("givelife", function(t)
 	consoleplayer.lives = $ + 1
 end, default_ready)
 effects["kill"] = CCEffect.New("kill", function(t)
-	P_DamageMobj(consoleplayer.mo, nil, nil, 1, DMG_INSTAKILL)
-	P_DamageMobj(consoleplayer.mo, nil, nil, 1, DMG_SPECTATOR)
+	if maptol & TOL_NIGHTS == 0 then
+		P_DamageMobj(consoleplayer.mo, nil, nil, 1, DMG_INSTAKILL)
+		P_DamageMobj(consoleplayer.mo, nil, nil, 1, DMG_SPECTATOR)
+	else
+		consoleplayer.nightstime = 1 -- Game reduces this by one after our code ran without checking for timeout -> integer underflow
+		P_PlayerRingBurst(consoleplayer, consoleplayer.rings)
+		consoleplayer.rings = 0
+	end
 end, default_ready)
 effects["slap"] = CCEffect.New("slap", function(t)
 	P_DoPlayerPain(consoleplayer, consoleplayer.mo, consoleplayer.mo)
@@ -203,13 +209,13 @@ effects["sneakers"] = CCEffect.New("sneakers", function(t)
 	consoleplayer.powers[pw_sneakers] = sneakertics
 	P_PlayJingle(consoleplayer, JT_SHOES)
 end, function()
-	return default_ready() and (consoleplayer.powers[pw_sneakers] == 0)
+	return default_ready() and (consoleplayer.powers[pw_sneakers] == 0) and (maptol & TOL_NIGHTS == 0)
 end)
 effects["invulnerability"] = CCEffect.New("invulnerability", function(t)
 	consoleplayer.powers[pw_invulnerability] = invulntics
 	P_PlayJingle(consoleplayer, JT_INV)
 end, function()
-	return default_ready() and (consoleplayer.powers[pw_invulnerability] == 0)
+	return default_ready() and (consoleplayer.powers[pw_invulnerability] == 0) and (maptol & TOL_NIGHTS == 0)
 end)
 
 effects["nojump"] = CCEffect.New("nojump", function(t)
@@ -231,7 +237,9 @@ effects["crawla"] = CCEffect.New("crawla", function(t)
 	local mobj = P_SpawnMobj(x, y, z, MT_BLUECRAWLA)
 	-- flip with player grav
 	mobj.eflags = $ | play_mo.eflags & MFE_VERTICALFLIP
-end, default_ready)
+end, function()
+	return default_ready() and (maptol & TOL_NIGHTS == 0)
+end)
 effects["rosy"] = CCEffect.New("rosy", function(t)
 	local play_mo = consoleplayer.mo
 	local x = play_mo.x + play_mo.momx + P_RandomRange(-128, 128) * FRACUNIT
@@ -241,7 +249,9 @@ effects["rosy"] = CCEffect.New("rosy", function(t)
 		z = play_mo.ceilingz + play_mo.momz
 	end
 	local mobj = P_SpawnMobj(x, y, z, MT_ROSY)
-end, default_ready)
+end, function()
+	return default_ready() and (maptol & TOL_NIGHTS == 0)
+end)
 effects["commander"] = CCEffect.New("commander", function(t)
 	local play_mo = consoleplayer.mo
 	local x = play_mo.x + play_mo.momx + P_RandomRange(-256, 256) * FRACUNIT
