@@ -279,33 +279,53 @@ effects["lightningshield"] = CCEffect.New("pityshield", function(t)
 	P_SpawnShieldOrb(consoleplayer)
 end, default_ready)
 
+local function check_skin(skin)
+	if not R_SkinUsable(consoleplayer, skin) then
+		create_response(id, UNAVAILABLE)
+		return false
+	end
+	return default_ready()
+end
+
 effects["changesonic"] = CCEffect.New("changesonic", function(t)
 	consoleplayer.mo.skin = "sonic"
 	R_SetPlayerSkin(consoleplayer, "sonic")
-end, default_ready)
+end, function()
+	return check_skin("sonic")
+end)
 effects["changetails"] = CCEffect.New("changetails", function(t)
 	consoleplayer.mo.skin = "tails"
 	R_SetPlayerSkin(consoleplayer, "tails")
-end, default_ready)
+end, function()
+	return check_skin("tails")
+end)
 effects["changeknuckles"] = CCEffect.New("changeknuckles", function(t)
 	consoleplayer.mo.skin = "knuckles"
 	R_SetPlayerSkin(consoleplayer, "knuckles")
-end, default_ready)
+end, function()
+	return check_skin("knuckles")
+end)
 effects["changeamy"] = CCEffect.New("changeamy", function(t)
 	consoleplayer.mo.skin = "amy"
 	R_SetPlayerSkin(consoleplayer, "amy")
-end, default_ready)
+end, function()
+	return check_skin("amy")
+end)
 effects["changefang"] = CCEffect.New("changefang", function(t)
 	consoleplayer.mo.skin = "fang"
 	R_SetPlayerSkin(consoleplayer, "fang")
-end, default_ready)
+end,  function()
+	return check_skin("fang")
+end)
 effects["changemetal"] = CCEffect.New("changemetal", function(t)
 	consoleplayer.mo.skin = "metalsonic"
 	R_SetPlayerSkin(consoleplayer, "metalsonic")
-end, default_ready)
+end,  function()
+	return check_skin("metalsonic")
+end)
 effects["changerandom"] = CCEffect.New("changerandom", function(t)
 	local skin = skins[P_RandomKey(#skins)]
-	while not (skin.valid) do
+	while not (skin.valid) or not R_SkinUsable(consoleplayer, skin) do
 		skin = skins[P_RandomKey(#skins)]
 	end
 	consoleplayer.mo.skin = skin.name
