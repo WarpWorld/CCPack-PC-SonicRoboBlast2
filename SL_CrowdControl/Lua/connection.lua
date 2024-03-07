@@ -288,38 +288,50 @@ local function check_skin(skin)
 end
 
 effects["changesonic"] = CCEffect.New("changesonic", function(t)
-	consoleplayer.mo.skin = "sonic"
-	R_SetPlayerSkin(consoleplayer, "sonic")
+	if R_SkinUsable(consoleplayer, "sonic") then
+		consoleplayer.mo.skin = "sonic"
+		R_SetPlayerSkin(consoleplayer, "sonic")
+	end
 end, function()
 	return check_skin("sonic")
 end)
 effects["changetails"] = CCEffect.New("changetails", function(t)
-	consoleplayer.mo.skin = "tails"
-	R_SetPlayerSkin(consoleplayer, "tails")
+	if R_SkinUsable(consoleplayer, "tails") then
+		consoleplayer.mo.skin = "tails"
+		R_SetPlayerSkin(consoleplayer, "tails")
+	end
 end, function()
 	return check_skin("tails")
 end)
 effects["changeknuckles"] = CCEffect.New("changeknuckles", function(t)
-	consoleplayer.mo.skin = "knuckles"
-	R_SetPlayerSkin(consoleplayer, "knuckles")
+	if R_SkinUsable(consoleplayer, "knuckles") then
+		consoleplayer.mo.skin = "knuckles"
+		R_SetPlayerSkin(consoleplayer, "knuckles")
+	end
 end, function()
 	return check_skin("knuckles")
 end)
 effects["changeamy"] = CCEffect.New("changeamy", function(t)
-	consoleplayer.mo.skin = "amy"
-	R_SetPlayerSkin(consoleplayer, "amy")
+	if R_SkinUsable(consoleplayer, "amy") then
+		consoleplayer.mo.skin = "amy"
+		R_SetPlayerSkin(consoleplayer, "amy")
+	end
 end, function()
 	return check_skin("amy")
 end)
 effects["changefang"] = CCEffect.New("changefang", function(t)
-	consoleplayer.mo.skin = "fang"
-	R_SetPlayerSkin(consoleplayer, "fang")
+	if R_SkinUsable(consoleplayer, "fang") then
+		consoleplayer.mo.skin = "fang"
+		R_SetPlayerSkin(consoleplayer, "fang")
+	end
 end,  function()
 	return check_skin("fang")
 end)
 effects["changemetal"] = CCEffect.New("changemetal", function(t)
-	consoleplayer.mo.skin = "metalsonic"
-	R_SetPlayerSkin(consoleplayer, "metalsonic")
+	if R_SkinUsable(consoleplayer, "metalsonic") then
+		consoleplayer.mo.skin = "metalsonic"
+		R_SetPlayerSkin(consoleplayer, "metalsonic")
+	end
 end,  function()
 	return check_skin("metalsonic")
 end)
