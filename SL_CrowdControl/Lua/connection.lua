@@ -263,18 +263,30 @@ effects["commander"] = CCEffect.New("commander", function(t)
 end, default_ready)
 
 effects["pityshield"] = CCEffect.New("pityshield", function(t)
+	if consoleplayer.powers[pw_shield] ~= SH_PITY then
+		S_StartSound(consoleplayer.mo, sfx_shield)
+	end
 	consoleplayer.powers[pw_shield] = SH_PITY
 	P_SpawnShieldOrb(consoleplayer)
 end, default_ready)
-effects["fireshield"] = CCEffect.New("pityshield", function(t)
+effects["fireshield"] = CCEffect.New("fireshield", function(t)
+	if consoleplayer.powers[pw_shield] ~= SH_FLAMEAURA then
+		S_StartSound(consoleplayer.mo, sfx_s3k3e)
+	end
 	consoleplayer.powers[pw_shield] = SH_FLAMEAURA
 	P_SpawnShieldOrb(consoleplayer)
 end, default_ready)
-effects["bubbleshield"] = CCEffect.New("pityshield", function(t)
+effects["bubbleshield"] = CCEffect.New("bubbleshield", function(t)
+	if consoleplayer.powers[pw_shield] ~= SH_BUBBLEWRAP then
+		S_StartSound(consoleplayer.mo, sfx_s3k3f)
+	end
 	consoleplayer.powers[pw_shield] = SH_BUBBLEWRAP
 	P_SpawnShieldOrb(consoleplayer)
 end, default_ready)
-effects["lightningshield"] = CCEffect.New("pityshield", function(t)
+effects["lightningshield"] = CCEffect.New("lightningshield", function(t)
+	if consoleplayer.powers[pw_shield] ~= SH_THUNDERCOIN then
+		S_StartSound(consoleplayer.mo, sfx_s3k41)
+	end
 	consoleplayer.powers[pw_shield] = SH_THUNDERCOIN
 	P_SpawnShieldOrb(consoleplayer)
 end, default_ready)
