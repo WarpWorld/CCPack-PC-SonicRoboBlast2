@@ -337,7 +337,7 @@ end,  function()
 end)
 effects["changerandom"] = CCEffect.New("changerandom", function(t)
 	local skin = skins[P_RandomKey(#skins)]
-	while not (skin.valid) or not R_SkinUsable(consoleplayer, skin) do
+	while not (skin.valid) or not R_SkinUsable(consoleplayer, skin.name) do
 		skin = skins[P_RandomKey(#skins)]
 	end
 	consoleplayer.mo.skin = skin.name
