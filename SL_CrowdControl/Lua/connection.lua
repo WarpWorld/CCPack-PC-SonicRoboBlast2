@@ -252,8 +252,10 @@ end
 end, default_ready)*/
 effects["bumper"] = CCEffect.New("bumper", function(t)
 	local player = consoleplayer
-	local x = player.mo.x + player.mo.momx + P_RandomRange(-16, 16) * FRACUNIT
-	local y = player.mo.y + player.mo.momy + P_RandomRange(-16, 16) * FRACUNIT
+	local dir_x = cos(player.mo.angle)
+	local dir_y = sin(player.mo.angle)
+	local x = player.mo.x + player.mo.momx + P_RandomRange(-16, 16) * FRACUNIT + dir_x * 128
+	local y = player.mo.y + player.mo.momy + P_RandomRange(-16, 16) * FRACUNIT + dir_y * 128
 	local z = player.mo.z + player.mo.momz + P_RandomRange(-8, 8) * FRACUNIT
 	local mobj = P_SpawnMobj(x, y, z, MT_BUMPER)
 	table.insert(bumpers, {["bumper"]=mobj,["timer"]=0})
@@ -303,8 +305,10 @@ end, default_ready, 15 * TICRATE)
 
 effects["crawla"] = CCEffect.New("crawla", function(t)
 	local play_mo = consoleplayer.mo
-	local x = play_mo.x + play_mo.momx + P_RandomRange(-256, 256) * FRACUNIT
-	local y = play_mo.y + play_mo.momy + P_RandomRange(-256, 256) * FRACUNIT
+	local dir_x = cos(play_mo.angle)
+	local dir_y = sin(play_mo.angle)
+	local x = play_mo.x + play_mo.momx + P_RandomRange(-256, 256) * FRACUNIT + dir_x * 128
+	local y = play_mo.y + play_mo.momy + P_RandomRange(-256, 256) * FRACUNIT + dir_y * 128
 	local z = play_mo.z + play_mo.momz
 	local mobj = P_SpawnMobj(x, y, z, MT_BLUECRAWLA)
 	-- flip with player grav
@@ -314,8 +318,10 @@ end, function()
 end)
 effects["rosy"] = CCEffect.New("rosy", function(t)
 	local play_mo = consoleplayer.mo
-	local x = play_mo.x + play_mo.momx + P_RandomRange(-128, 128) * FRACUNIT
-	local y = play_mo.y + play_mo.momy + P_RandomRange(-128, 128) * FRACUNIT
+	local dir_x = cos(play_mo.angle)
+	local dir_y = sin(play_mo.angle)
+	local x = play_mo.x + play_mo.momx + P_RandomRange(-128, 128) * FRACUNIT + dir_x * 128
+	local y = play_mo.y + play_mo.momy + P_RandomRange(-128, 128) * FRACUNIT + dir_y * 128
 	local z = play_mo.floorz + play_mo.momz
 	if not (play_mo.eflags & MFE_VERTICALFLIP == 0) then
 		z = play_mo.ceilingz + play_mo.momz
@@ -326,8 +332,10 @@ end, function()
 end)
 effects["commander"] = CCEffect.New("commander", function(t)
 	local play_mo = consoleplayer.mo
-	local x = play_mo.x + play_mo.momx + P_RandomRange(-256, 256) * FRACUNIT
-	local y = play_mo.y + play_mo.momy + P_RandomRange(-256, 256) * FRACUNIT
+	local dir_x = cos(play_mo.angle)
+	local dir_y = sin(play_mo.angle)
+	local x = play_mo.x + play_mo.momx + P_RandomRange(-256, 256) * FRACUNIT + dir_x * 128
+	local y = play_mo.y + play_mo.momy + P_RandomRange(-256, 256) * FRACUNIT + dir_y * 128
 	local z = play_mo.z + play_mo.momz
 	local mobj = P_SpawnMobj(x, y, z, MT_CRAWLACOMMANDER)
 	-- flip with player grav
