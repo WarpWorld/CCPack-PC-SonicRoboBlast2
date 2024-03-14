@@ -1,4 +1,4 @@
-local JSON_VERSION = {0, 0, 1}
+local JSON_VERSION = {0, 0, 2}
 local LOADED_VERSION = rawget(_G, "JSON_LIB_VERSION")
 
 if LOADED_VERSION != nil then
@@ -89,7 +89,7 @@ local function parse_object(str, pos)
 	--print('"'..str:sub(key_start + 1, key_end - 1)..'":'..stringify(value))
 	result[str:sub(key_start + 1, key_end - 1)] = value
 	
-	local str_start, str_end = find_any(str, value_end + 1, ",", "}")
+	local str_start, str_end = find_any(str, value_end, ",", "}")
 	local ignored = nil
 	while str:sub(str_start, str_end) == "," do
 		ignored, key_start = str:find('"', str_end + 1)

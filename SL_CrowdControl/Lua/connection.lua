@@ -1,10 +1,12 @@
 local ready_path = "client/crowd_control/connector.txt"
 local input_path = "client/crowd_control/input.txt"
 local output_path = "client/crowd_control/output.txt"
+local log_path = "client/crowd_control/latest-log.txt"
 
 local ready_file
 local input_file
 local output_file
+local log_file
 
 local started = false
 local effects = {} -- <string, effect>
@@ -23,6 +25,26 @@ local RETRY = 3
 local PAUSED = 6
 local RESUMED = 7
 local FINISHED = 8
+
+local cc_debug = CV_RegisterVar({
+	name = "cc_debug",
+	defaultvalue = 0,
+	flags = CV_NOTINNET|CV_ALLOWLUA,
+	PossibleValue = CV_OnOff,
+	func = nil
+})
+
+local function log_msg_silent(...)
+	if (cc_debug.value ~= 0) and (io.type(log_file) == "file") then
+		log_file:write("["..tostring(os.clock()).."] ", ..., "\n")
+		log_file:flush()
+	end
+end
+
+local function log_msg(...)
+	print(...)
+	log_msg_silent(...)
+end
 
 local function create_response(msg_id, result, time_remaining, message)
 	if not (type(time_remaining) == "number") then
@@ -50,10 +72,10 @@ local function handle_message(msg)
 			local code = msg["code"]
 			local effect = effects[code]
 			if effect == nil or not (getmetatable(effect) == CCEffect.Meta) then
-				print("Couldn't find effect '"..code.."'!")
+				log_msg("Couldn't find effect '"..code.."'!")
 				create_response(id, UNAVAILABLE)
 			elseif effect.ready() and (not effect.is_timed or (effect.is_timed and (running_effects[effect.code] == nil))) then
-				print(tostring(msg["viewer"]).." activated effect '"..code.."'!")
+				log_msg(tostring(msg["viewer"]).." activated effect '"..code.."'!")
 				local quantity = msg["quantity"]
 				if quantity == nil or quantity == 0 then
 					quantity = 1
@@ -73,14 +95,14 @@ local function handle_message(msg)
 			local code = msg["code"]
 			local effect = effects[code]
 			if effect == nil or not (getmetatable(effect) == CCEffect.Meta) then
-				print("Couldn't find effect '"..code.."'!")
+				log_msg("Couldn't find effect '"..code.."'!")
 				create_response(id, UNAVAILABLE)
 			end
 			running_effects[code] = nil
 			create_response(id, SUCCESS)
 		-- keepalive
 		elseif msg_type == 255 then
-			--print("PONG")
+			log_msg_silent("PONG")
 		end
 	end
 end
@@ -88,10 +110,11 @@ end
 local function main_loop()
 	if not started then
 		started = true
+		log_file = io.openlocal(log_path, "w")
 		for k,v in pairs(effects) do
-			print(k)
+			log_msg(k)
 		end
-		print("Effects loaded")
+		log_msg("Effects loaded")
 	else
 		for k,v in pairs(running_effects) do
 			if not (v == nil) then
@@ -214,7 +237,7 @@ local function drawRunningEffects(drawer, player, cam)
 end
 
 
-customhud.SetupItem("rings", "crowd_control", drawRunningEffects, "game	");
+customhud.SetupItem("cc_debuffs", "crowd_control", drawRunningEffects, "game");
 
 
 -- Effects =====================================================================
