@@ -170,6 +170,55 @@ end
 
 addHook("GameQuit", on_game_quit)
 
+-- HUD Drawer ==================================================================
+
+local function drawRunningEffects(drawer, player, cam)
+	local timers = {}
+	for k,v in pairs(running_effects)
+		if not (v == nil) then
+			local timeleft = (effects[k].duration - v["timer"]) + 1 --just to make sure this won't become zero
+			if (timers[timeleft] == nil) then
+				timers[timeleft] = {
+					["time"]=timeleft, 
+					["effects"]={k}
+				}
+			else
+				table.insert(timers[timeleft]["effects"], k)
+			end
+		end
+	end
+	table.sort(timers, function(a, b)
+		return a.time > b.time
+	end)
+	local offset = 32
+	for i,v in pairs(timers)
+		for j,code in ipairs(timers[i]["effects"])
+			local gfx = ""
+			if (code == "invertcontrols") then
+				gfx = "INVCICON"
+			elseif (code == "nojump") then
+				gfx = "NOJPICON"
+			elseif (code == "nospin") then
+				gfx = "NOSPICON"
+			end
+			if drawer.patchExists(gfx) then
+				if not((i < 3 * TICRATE) and (i % 2 == 0)) then
+					local patch = drawer.cachePatch(gfx)
+					drawer.drawScaled((320 - offset) * FRACUNIT, (200 - 44) * FRACUNIT, FRACUNIT/2, patch)
+					drawer.drawString(320 - offset + 16, 200 - 36, i/TICRATE, 0, "thin-right")
+				end
+				offset = $ + 4 + 16
+			end
+		end
+	end
+end
+
+
+customhud.SetupItem("rings", "crowd_control", drawRunningEffects, "game	");
+
+
+-- Effects =====================================================================
+
 local function default_ready()
 	-- only run while in a level, not paused and not exiting a stage
 	return gamestate == GS_LEVEL and not paused and not (consoleplayer == nil) and (consoleplayer.playerstate == PST_LIVE) and not (consoleplayer.exiting > 0)
