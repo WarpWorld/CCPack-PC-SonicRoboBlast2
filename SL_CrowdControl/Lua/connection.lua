@@ -36,7 +36,7 @@ local cc_debug = CV_RegisterVar({
 
 local function log_msg_silent(...)
 	if (cc_debug.value ~= 0) and (io.type(log_file) == "file") then
-		log_file:write("["..tostring(os.clock()).."] ", ..., "\n")
+		log_file:write("["..tostring(os.clock()).."] ", ..., "\r\n")
 		log_file:flush()
 	end
 end
@@ -44,6 +44,18 @@ end
 local function log_msg(...)
 	print(...)
 	log_msg_silent(...)
+end
+
+//https://stackoverflow.com/questions/1426954/split-string-in-lua
+local function split (inputstr, sep)
+    if sep == nil then
+        sep = "%s"
+    end
+    local t={}
+    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+            table.insert(t, str)
+    end
+    return t
 end
 
 local function create_response(msg_id, result, time_remaining, message)
@@ -141,7 +153,9 @@ local function main_loop()
 		input_file = io.openlocal(input_path, "r+")
 		if not (input_file == nil) then
 			for line in input_file:lines() do
-				handle_message(parseJSON(line))
+				for i,msg in ipairs(split(line, "%c")) do -- This is a bad assumption, but all control codes should be escaped
+					handle_message(parseJSON(msg))
+				end
 			end
 			input_file:close()
 			io.openlocal(input_path,"w"):close() -- clear the file
@@ -151,7 +165,7 @@ local function main_loop()
 			output_file = io.openlocal(output_path,"w")
 			if not (output_file == nil) then
 				for i,v in ipairs(message_queue) do
-					output_file:write(stringify(v).."\0\n")
+					output_file:write(stringify(v).."\0")
 				end
 				message_queue = {}
 				output_file:close()
@@ -215,6 +229,7 @@ local function drawRunningEffects(drawer, player, cam)
 	end)
 	local offset = 32
 	for i,v in pairs(timers)
+		table.sort(timers[i]["effects"])
 		for j,code in ipairs(timers[i]["effects"])
 			local gfx = ""
 			if (code == "invertcontrols") then
