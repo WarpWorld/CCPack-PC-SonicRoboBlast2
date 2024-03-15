@@ -36,7 +36,7 @@ local cc_debug = CV_RegisterVar({
 
 local function log_msg_silent(...)
 	if (cc_debug.value ~= 0) and (io.type(log_file) == "file") then
-		log_file:write("["..tostring(os.clock()).."] ", ..., "\r\n")
+		log_file:write("["..tostring(os.clock()).."] ", ...)
 		log_file:flush()
 	end
 end
@@ -89,7 +89,7 @@ local function handle_message(msg)
 			elseif effect.ready() and (not effect.is_timed or (effect.is_timed and (running_effects[effect.code] == nil))) then
 				log_msg(tostring(msg["viewer"]).." activated effect '"..code.."'!")
 				local quantity = msg["quantity"]
-				if quantity == nil or quantity == 0 then
+				if (quantity == nil) or (quantity == 0) then
 					quantity = 1
 				end
 				for i=1,quantity do
@@ -115,6 +115,7 @@ local function handle_message(msg)
 		-- keepalive
 		elseif msg_type == 255 then
 			log_msg_silent("PONG")
+			table.insert(message_queue, {["id"] = id, ["type"] = 255})
 		end
 	end
 end
@@ -154,6 +155,7 @@ local function main_loop()
 		if not (input_file == nil) then
 			for line in input_file:lines() do
 				for i,msg in ipairs(split(line, "%c")) do -- This is a bad assumption, but all control codes should be escaped
+					log_msg_silent(msg)
 					handle_message(parseJSON(msg))
 				end
 			end
@@ -165,7 +167,9 @@ local function main_loop()
 			output_file = io.openlocal(output_path,"w")
 			if not (output_file == nil) then
 				for i,v in ipairs(message_queue) do
-					output_file:write(stringify(v).."\0")
+					local out = stringify(v)
+					log_msg_silent(">", out)
+					output_file:write(out.."\0")
 				end
 				message_queue = {}
 				output_file:close()
@@ -224,12 +228,15 @@ local function drawRunningEffects(drawer, player, cam)
 			end
 		end
 	end
-	table.sort(timers, function(a, b)
-		return a.time > b.time
+	local times = {}
+	for i,v in pairs(timers)
+		table.insert(times, i)
+	end
+	table.sort(times, function(a, b)
+		return a > b --inverse order
 	end)
 	local offset = 32
-	for i,v in pairs(timers)
-		table.sort(timers[i]["effects"])
+	for _,i in ipairs(times)
 		for j,code in ipairs(timers[i]["effects"])
 			local gfx = ""
 			if (code == "invertcontrols") then
@@ -269,14 +276,15 @@ effects["bumper"] = CCEffect.New("bumper", function(t)
 	local player = consoleplayer
 	local dir_x = cos(player.mo.angle)
 	local dir_y = sin(player.mo.angle)
-	local x = player.mo.x + player.mo.momx + P_RandomRange(-16, 16) * FRACUNIT + dir_x * 128
-	local y = player.mo.y + player.mo.momy + P_RandomRange(-16, 16) * FRACUNIT + dir_y * 128
+	local x = player.mo.x + player.mo.momx + P_RandomRange(-16, 16) * FRACUNIT + dir_x * 96
+	local y = player.mo.y + player.mo.momy + P_RandomRange(-16, 16) * FRACUNIT + dir_y * 96
 	local z = player.mo.z + player.mo.momz + P_RandomRange(-8, 8) * FRACUNIT
 	local mobj = P_SpawnMobj(x, y, z, MT_BUMPER)
 	table.insert(bumpers, {["bumper"]=mobj,["timer"]=0})
 end, default_ready)
 effects["giverings"] = CCEffect.New("giverings", function(t)
 	consoleplayer.rings = $ + 1
+	S_StartSound(consoleplayer.mo, sfx_itemup)
 end, default_ready)
 effects["givelife"] = CCEffect.New("givelife", function(t)
 	consoleplayer.lives = $ + 1
@@ -322,8 +330,8 @@ effects["crawla"] = CCEffect.New("crawla", function(t)
 	local play_mo = consoleplayer.mo
 	local dir_x = cos(play_mo.angle)
 	local dir_y = sin(play_mo.angle)
-	local x = play_mo.x + play_mo.momx + P_RandomRange(-256, 256) * FRACUNIT + dir_x * 128
-	local y = play_mo.y + play_mo.momy + P_RandomRange(-256, 256) * FRACUNIT + dir_y * 128
+	local x = play_mo.x + play_mo.momx + P_RandomRange(-128, 128) * FRACUNIT + dir_x * 128
+	local y = play_mo.y + play_mo.momy + P_RandomRange(-128, 128) * FRACUNIT + dir_y * 128
 	local z = play_mo.z + play_mo.momz
 	local mobj = P_SpawnMobj(x, y, z, MT_BLUECRAWLA)
 	-- flip with player grav
