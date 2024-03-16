@@ -99,6 +99,7 @@ local function handle_message(msg)
 					effect.update(0, msg["parameters"]) -- parameters may be nil
 				end
 				if effect.is_timed then
+					effect.duration = ((msg["duration"] * 35) / 1000)
 					running_effects[effect.code] = {["timer"] = 0, ["id"] = id, ["was_ready"] = true}
 				end
 				create_response(id, SUCCESS, effect.duration)
