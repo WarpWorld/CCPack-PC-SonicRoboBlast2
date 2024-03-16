@@ -18,6 +18,8 @@ local id = 0
 local message_queue = {}
 local bumpers = {} --list<(mobj, timer)>
 
+local input_dirty = false -- if this flag is set, input parsing is deferred a tic
+
 local SUCCESS = 0
 local FAILED = 1
 local UNAVAILABLE = 2
@@ -37,6 +39,7 @@ local cc_debug = CV_RegisterVar({
 local function log_msg_silent(...)
 	if (cc_debug.value ~= 0) and (io.type(log_file) == "file") then
 		log_file:write("["..tostring(os.clock()).."] ", ...)
+		log_file:write("\n")
 		log_file:flush()
 	end
 end
@@ -68,7 +71,7 @@ local function create_response(msg_id, result, time_remaining, message)
 	local response = {
 		["id"] = msg_id,
 		["status"] = result,
-		["timeRemaining"] = (time_remaining * 1000) / 35,
+		["timeRemaining"] = (time_remaining * 1000) / TICRATE,
 		["message"] = message,
 		["type"] = 0
 	}
@@ -115,7 +118,7 @@ local function handle_message(msg)
 		-- keepalive
 		elseif msg_type == 255 then
 			log_msg_silent("PONG")
-			table.insert(message_queue, {["id"] = id, ["type"] = 255})
+			table.insert(message_queue, {["id"] = 0, ["type"] = 255})
 		end
 	end
 end
@@ -151,16 +154,30 @@ local function main_loop()
 			end
 		end
 		io.openlocal(ready_path, "w"):close()
-		input_file = io.openlocal(input_path, "r+")
-		if not (input_file == nil) then
-			for line in input_file:lines() do
-				for i,msg in ipairs(split(line, "%c")) do -- This is a bad assumption, but all control codes should be escaped
-					log_msg_silent(msg)
-					handle_message(parseJSON(msg))
+		if input_dirty then
+			input_file = io.openlocal(input_path,"w")
+			if not (input_file == nil)
+				input_file:close() -- clear the file
+				input_dirty = false
+			end
+		else
+			input_file = io.openlocal(input_path, "r+")
+			if not (input_file == nil) then
+				for line in input_file:lines() do
+					for i,msg in ipairs(split(line, "%c")) do -- This is a bad assumption, but all control codes should be escaped
+						log_msg_silent(msg)
+						handle_message(parseJSON(msg))
+					end
+				end
+				input_file:close()
+				input_file = io.openlocal(input_path,"w")
+				-- in rare cases handling the messages took too long and CC grabbed the file already
+				if not (input_file == nil) then
+					input_file:close() -- clear the file
+				else
+					input_dirty = true
 				end
 			end
-			input_file:close()
-			io.openlocal(input_path,"w"):close() -- clear the file
 		end
 		if not (#message_queue == 0) then
 			io.openlocal(ready_path, "w"):close()
@@ -172,18 +189,25 @@ local function main_loop()
 					output_file:write(out.."\0")
 				end
 				message_queue = {}
-				output_file:close()
+			else
+				log_msg_silent("Failed to open output file!")
 			end
 		end
 		keepalive_timer = $ + 1
 		if keepalive_timer >= TICRATE then
 			io.openlocal(ready_path, "w"):close()
-			output_file = io.openlocal(output_path,"w")
-			if not (output_file == nil) then
-				output_file:write('{"id":'..tostring(id+1)..',"type":255}')
-				output_file:close()
-				keepalive_timer = 0
+			if io.type(output_file) ~= "file" then
+				output_file = io.openlocal(output_path,"w")
 			end
+			if not (output_file == nil) then
+				output_file:write('{"id":0,"type":255}\0')
+				keepalive_timer = 0
+			else
+				log_msg_silent("Failed to send keepalive!")
+			end
+		end
+		if io.type(output_file) == "file" then
+			output_file:close()
 		end
 		ready_file = io.openlocal(ready_path, "w")
 		ready_file:write("SRB2 READY!\0")
