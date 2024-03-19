@@ -49,6 +49,24 @@ local function log_msg(...)
 	log_msg_silent(...)
 end
 
+-- these functions are for simple error logging
+-- For error handling they return the same values returned by the function they call
+local function open_local(path, mode)
+	local file, err = io.openlocal(path, mode)
+	if err ~= nil then
+		log_msg_silent(err)
+	end
+	return file, err
+end
+
+local function write_file(file, ...)
+	local success,err,err_code = file:write(...)
+	if not success then
+		log_msg("[ERROR:",tostring(err_code),"] ", err)
+	end
+	return success,err,err_code
+end
+
 //https://stackoverflow.com/questions/1426954/split-string-in-lua
 local function split (inputstr, sep)
     if sep == nil then
@@ -90,7 +108,11 @@ local function handle_message(msg)
 				log_msg("Couldn't find effect '"..code.."'!")
 				create_response(id, UNAVAILABLE)
 			elseif effect.ready() and (not effect.is_timed or (effect.is_timed and (running_effects[effect.code] == nil))) then
-				log_msg(tostring(msg["viewer"]).." activated effect '"..code.."'!")
+				if (cc_debug.value ~= 0) then
+					log_msg(tostring(msg["viewer"]).." activated effect '"..code.."' ("..tostring(id)..")!")
+				else
+					log_msg(tostring(msg["viewer"]).." activated effect '"..code.."'!")
+				end
 				local quantity = msg["quantity"]
 				if (quantity == nil) or (quantity == 0) then
 					quantity = 1
@@ -99,7 +121,7 @@ local function handle_message(msg)
 					effect.update(0, msg["parameters"]) -- parameters may be nil
 				end
 				if effect.is_timed then
-					effect.duration = ((msg["duration"] * 35) / 1000)
+					effect.duration = ((msg["duration"] * TICRATE) / 1000)
 					running_effects[effect.code] = {["timer"] = 0, ["id"] = id, ["was_ready"] = true}
 				end
 				create_response(id, SUCCESS, effect.duration)
@@ -121,23 +143,29 @@ local function handle_message(msg)
 			log_msg_silent("PONG")
 			table.insert(message_queue, {["id"] = 0, ["type"] = 255})
 		end
+	else
+		log_msg("Received empty message!")
 	end
 end
 
 local function main_loop()
 	if not started then
 		started = true
-		log_file = io.openlocal(log_path, "w")
+		log_file = open_local(log_path, "w")
 		for k,v in pairs(effects) do
 			log_msg(k)
 		end
 		log_msg("Effects loaded")
+		ready_file = open_local(ready_path, "w")
+		write_file(ready_file, "SRB2 READY!\0")
+		ready_file:close()
 	else
 		for k,v in pairs(running_effects) do
+			local effect = effects[k]
 			if not (v == nil) then
-				if effects[k].ready() then
+				if effect.ready() then
 					running_effects[k]["timer"] = v["timer"] + 1
-					effects[k].update(v["timer"] + 1)
+					effect.update(v["timer"] + 1)
 					if not v["was_ready"] then
 						create_response(v["id"], RESUMED)
 					end
@@ -146,48 +174,48 @@ local function main_loop()
 						create_response(v["id"], PAUSED)
 					end
 				end
-				
 			end
-			v["was_ready"] = effects[k].ready()
-			if v["timer"] + 1 > effects[k].duration then
-				create_response(v["id"], FINISHED)
+			v["was_ready"] = effect.ready()
+			if v["timer"] + 1 > effect.duration then
+				create_response(v["id"], FINISHED, 0, "'"..effect.code.."' finished!")
 				running_effects[k] = nil
 			end
 		end
-		io.openlocal(ready_path, "w"):close()
 		if input_dirty then
-			input_file = io.openlocal(input_path,"w")
+			input_file = open_local(input_path,"w")
 			if not (input_file == nil)
 				input_file:close() -- clear the file
 				input_dirty = false
 			end
 		else
-			input_file = io.openlocal(input_path, "r+")
+			input_file = open_local(input_path, "r")
 			if not (input_file == nil) then
-				for line in input_file:lines() do
-					for i,msg in ipairs(split(line, "%c")) do -- This is a bad assumption, but all control codes should be escaped
+				local content = input_file:read("*a")
+				if not (content == "") then
+					for i,msg in ipairs(split(content, "%c")) do -- This is a bad assumption, but all control codes should be escaped
 						log_msg_silent(msg)
 						handle_message(parseJSON(msg))
 					end
-				end
-				input_file:close()
-				input_file = io.openlocal(input_path,"w")
-				-- in rare cases handling the messages took too long and CC grabbed the file already
-				if not (input_file == nil) then
-					input_file:close() -- clear the file
+					input_file:close()
+					input_file = open_local(input_path,"w")
+					-- in rare cases handling the messages took too long and CC grabbed the file already
+					if not (input_file == nil) then
+						input_file:close() -- clear the file
+					else
+						input_dirty = true
+					end
 				else
-					input_dirty = true
+					input_file:close()
 				end
 			end
 		end
 		if not (#message_queue == 0) then
-			io.openlocal(ready_path, "w"):close()
-			output_file = io.openlocal(output_path,"w")
+			output_file = open_local(output_path,"w")
 			if not (output_file == nil) then
 				for i,v in ipairs(message_queue) do
 					local out = stringify(v)
 					log_msg_silent(">", out)
-					output_file:write(out.."\0")
+					write_file(output_file, out.."\0")
 				end
 				message_queue = {}
 			else
@@ -196,12 +224,11 @@ local function main_loop()
 		end
 		keepalive_timer = $ + 1
 		if keepalive_timer >= TICRATE then
-			io.openlocal(ready_path, "w"):close()
 			if io.type(output_file) ~= "file" then
-				output_file = io.openlocal(output_path,"w")
+				output_file = open_local(output_path,"w")
 			end
 			if not (output_file == nil) then
-				output_file:write('{"id":0,"type":255}\0')
+				write_file(output_file, '{"id":0,"type":255}\0')
 				keepalive_timer = 0
 			else
 				log_msg_silent("Failed to send keepalive!")
@@ -210,9 +237,6 @@ local function main_loop()
 		if io.type(output_file) == "file" then
 			output_file:close()
 		end
-		ready_file = io.openlocal(ready_path, "w")
-		ready_file:write("SRB2 READY!\0")
-		ready_file:close()
 	end
 	for i,v in ipairs(bumpers) do
 		v["timer"] = v["timer"] + 1
@@ -230,7 +254,7 @@ addHook("PreThinkFrame", main_loop)
 -- quitting: true if the application is exiting, false if returning to titlescreen
 local function on_game_quit(quitting)
 	if quitting then
-		io.openlocal(ready_path, "w"):close()
+		open_local(ready_path, "w"):close()
 	end
 end
 
