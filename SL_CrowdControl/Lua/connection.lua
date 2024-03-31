@@ -212,12 +212,10 @@ local function main_loop()
 		if not (#message_queue == 0) then
 			output_file = open_local(output_path,"w")
 			if not (output_file == nil) then
-				for i,v in ipairs(message_queue) do
-					local out = stringify(v)
-					log_msg_silent(">", out)
-					write_file(output_file, out.."\0")
-				end
-				message_queue = {}
+				local out = stringify(message_queue[1])
+				write_file(output_file, out.."\0")
+				log_msg_silent(">", out)
+				table.remove(message_queue, 1)
 			else
 				log_msg_silent("Failed to open output file!")
 			end
