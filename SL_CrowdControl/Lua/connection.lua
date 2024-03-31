@@ -19,6 +19,7 @@ local message_queue = {}
 local bumpers = {} --list<(mobj, timer)>
 local rosies = {} --list<mobj>
 
+local deaths = 0
 local input_dirty = false -- if this flag is set, input parsing is deferred a tic
 
 local SUCCESS = 0
@@ -237,6 +238,11 @@ local function main_loop()
 			output_file:close()
 		end
 	end
+	
+	if consoleplayer != nil then
+		consoleplayer.lives = (deaths % 99) + 1
+	end
+	
 	for i,v in ipairs(bumpers) do
 		v["timer"] = v["timer"] + 1
 		if v["timer"] >= 5*TICRATE then
@@ -252,6 +258,7 @@ addHook("PreThinkFrame", main_loop)
 
 -- quitting: true if the application is exiting, false if returning to titlescreen
 local function on_game_quit(quitting)
+	deaths = 0
 	if quitting then
 		open_local(ready_path, "w"):close()
 	end
@@ -268,6 +275,13 @@ local function on_map_loaded(mapnum)
 end
 
 addHook("MapLoad", on_map_loaded)
+
+local function on_player_death(mobj, inflictor, source, damagetype)
+	deaths = $ + 1
+	return false
+end
+
+addHook("MobjDeath", on_player_death, MT_PLAYER)
 
 local function brak_fix(boss)
 	for i,r in ipairs(rosies)
@@ -369,9 +383,6 @@ effects["giverings"] = CCEffect.New("giverings", function(t)
 	consoleplayer.rings = $ + 1
 	S_StartSound(consoleplayer.mo, sfx_itemup)
 end, default_ready)
-effects["givelife"] = CCEffect.New("givelife", function(t)
-	consoleplayer.lives = $ + 1
-end, default_ready)
 effects["kill"] = CCEffect.New("kill", function(t)
 	if maptol & TOL_NIGHTS == 0 then
 		P_DamageMobj(consoleplayer.mo, nil, nil, 1, DMG_INSTAKILL)
@@ -385,7 +396,7 @@ end, default_ready)
 effects["slap"] = CCEffect.New("slap", function(t)
 	P_DoPlayerPain(consoleplayer, consoleplayer.mo, consoleplayer.mo)
 end, function() 
-	return default_ready() and zoomtube_check()
+	return default_ready() and nights_check() and zoomtube_check()
 end)
 effects["sneakers"] = CCEffect.New("sneakers", function(t)
 	consoleplayer.powers[pw_sneakers] = sneakertics

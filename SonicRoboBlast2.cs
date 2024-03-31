@@ -23,7 +23,6 @@ namespace CrowdControl.Games.Packs.SonicRoboBlast2
                 {
                     new Effect("Spawn Bumper", "bumper") { Price = 10, Description = "Spawns a bumper in the player's way." },
                     new Effect("Give Rings", "giverings") { Price = 1, Quantity = 99, Description = "Give the player some rings." },
-                    new Effect("Give Life", "givelife") { Price = 100, Description = "Give the player an extra life." },
                     new Effect("Kill", "kill") { Price = 200, Description = "Take a life from the player." },
                     new Effect("Slap", "slap") { Price = 25, Description = "Give the player a good slap" },
                     new Effect("Give Speedshoes", "sneakers") { Price = 25, Description = "Give the player a pair of speed shoes. Gotta go fast!" },
