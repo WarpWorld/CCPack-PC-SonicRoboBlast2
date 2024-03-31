@@ -17,6 +17,7 @@ local id = 0
 
 local message_queue = {}
 local bumpers = {} --list<(mobj, timer)>
+local rosies = {} --list<mobj>
 
 local input_dirty = false -- if this flag is set, input parsing is deferred a tic
 
@@ -258,6 +259,27 @@ end
 
 addHook("GameQuit", on_game_quit)
 
+local function on_map_loaded(mapnum)
+	for i,r in ipairs(rosies)
+		if not r.valid then
+			table.remove(rosies, i)
+		end
+	end
+end
+
+addHook("MapLoad", on_map_loaded)
+
+local function brak_fix(boss)
+	for i,r in ipairs(rosies)
+		if r.valid then
+			P_RemoveMobj(r)
+			table.remove(rosies, i)
+		end
+	end
+end
+
+addHook("BossDeath", brak_fix, MT_CYBRAKDEMON)
+
 -- HUD Drawer ==================================================================
 
 local function drawRunningEffects(drawer, player, cam)
@@ -316,6 +338,18 @@ local function default_ready()
 	return gamestate == GS_LEVEL and not paused and not (consoleplayer == nil) and (consoleplayer.playerstate == PST_LIVE) and not (consoleplayer.exiting > 0)
 end
 
+local function nights_check()
+	return (maptol & TOL_NIGHTS == 0)
+end
+
+local function zoomtube_check()
+	return not (consoleplayer == nil) and consoleplayer.powers[pw_carry] != CR_ZOOMTUBE
+end
+
+local function minecart_check()
+	return not (consoleplayer == nil) and consoleplayer.powers[pw_carry] != CR_MINECART
+end
+
 /*effects["demo"] = CCEffect.New("demo", function(t)
 	print("This is a demo!")
 end, default_ready)*/
@@ -328,7 +362,9 @@ effects["bumper"] = CCEffect.New("bumper", function(t)
 	local z = player.mo.z + player.mo.momz + P_RandomRange(-8, 8) * FRACUNIT
 	local mobj = P_SpawnMobj(x, y, z, MT_BUMPER)
 	table.insert(bumpers, {["bumper"]=mobj,["timer"]=0})
-end, default_ready)
+end, function() 
+	return default_ready() and zoomtube_check()
+end)
 effects["giverings"] = CCEffect.New("giverings", function(t)
 	consoleplayer.rings = $ + 1
 	S_StartSound(consoleplayer.mo, sfx_itemup)
@@ -348,23 +384,27 @@ effects["kill"] = CCEffect.New("kill", function(t)
 end, default_ready)
 effects["slap"] = CCEffect.New("slap", function(t)
 	P_DoPlayerPain(consoleplayer, consoleplayer.mo, consoleplayer.mo)
-end, default_ready)
+end, function() 
+	return default_ready() and zoomtube_check()
+end)
 effects["sneakers"] = CCEffect.New("sneakers", function(t)
 	consoleplayer.powers[pw_sneakers] = sneakertics
 	P_PlayJingle(consoleplayer, JT_SHOES)
 end, function()
-	return default_ready() and (consoleplayer.powers[pw_sneakers] == 0) and (maptol & TOL_NIGHTS == 0)
+	return default_ready() and (consoleplayer.powers[pw_sneakers] == 0) and nights_check()
 end)
 effects["invulnerability"] = CCEffect.New("invulnerability", function(t)
 	consoleplayer.powers[pw_invulnerability] = invulntics
 	P_PlayJingle(consoleplayer, JT_INV)
 end, function()
-	return default_ready() and (consoleplayer.powers[pw_invulnerability] == 0) and (maptol & TOL_NIGHTS == 0)
+	return default_ready() and (consoleplayer.powers[pw_invulnerability] == 0) and nights_check()
 end)
 
 effects["nojump"] = CCEffect.New("nojump", function(t)
 	consoleplayer.cmd.buttons = consoleplayer.cmd.buttons & ~BT_JUMP
-end, default_ready, 15 * TICRATE)
+end, function() 
+	return default_ready() and minecart_check()
+end, 15 * TICRATE)
 effects["nospin"] = CCEffect.New("nospin", function(t)
 	consoleplayer.cmd.buttons = consoleplayer.cmd.buttons & ~BT_SPIN
 end, default_ready, 15 * TICRATE)
@@ -384,7 +424,7 @@ effects["crawla"] = CCEffect.New("crawla", function(t)
 	-- flip with player grav
 	mobj.eflags = $ | play_mo.eflags & MFE_VERTICALFLIP
 end, function()
-	return default_ready() and (maptol & TOL_NIGHTS == 0)
+	return default_ready() and nights_check()
 end)
 effects["rosy"] = CCEffect.New("rosy", function(t)
 	local play_mo = consoleplayer.mo
@@ -397,8 +437,9 @@ effects["rosy"] = CCEffect.New("rosy", function(t)
 		z = play_mo.ceilingz + play_mo.momz
 	end
 	local mobj = P_SpawnMobj(x, y, z, MT_ROSY)
+	table.insert(rosies, mobj)
 end, function()
-	return default_ready() and (maptol & TOL_NIGHTS == 0)
+	return default_ready() and nights_check()
 end)
 effects["commander"] = CCEffect.New("commander", function(t)
 	local play_mo = consoleplayer.mo
