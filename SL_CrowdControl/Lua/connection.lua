@@ -287,9 +287,9 @@ local function brak_fix(boss)
 	for i,r in ipairs(rosies)
 		if r.valid then
 			P_RemoveMobj(r)
-			table.remove(rosies, i)
 		end
 	end
+	rosies = {}
 end
 
 addHook("BossDeath", brak_fix, MT_CYBRAKDEMON)
