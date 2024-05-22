@@ -31,12 +31,12 @@ namespace CrowdControl.Games.Packs.SonicRoboBlast2
 
                     new Effect("Disable Jump", "nojump")
                     {
-                        Duration = 15, Price = 50, Category = "Controls",
+                        Duration = 10, Price = 50, Category = "Controls",
                         Description = "Disables the player's jump button."
                     },
                     new Effect("Disable Spin", "nospin")
                     {
-                        Duration = 15, Price = 50, Category = "Controls",
+                        Duration = 10, Price = 50, Category = "Controls",
                         Description = "Disables the player's spin button."
                     },
                     new Effect("Invert Controls", "invertcontrols")

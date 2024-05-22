@@ -421,10 +421,10 @@ effects["nojump"] = CCEffect.New("nojump", function(t)
 	consoleplayer.cmd.buttons = consoleplayer.cmd.buttons & ~BT_JUMP
 end, function() 
 	return default_ready() and minecart_check()
-end, 15 * TICRATE)
+end, 10 * TICRATE)
 effects["nospin"] = CCEffect.New("nospin", function(t)
 	consoleplayer.cmd.buttons = consoleplayer.cmd.buttons & ~BT_SPIN
-end, default_ready, 15 * TICRATE)
+end, default_ready, 10 * TICRATE)
 effects["invertcontrols"] = CCEffect.New("invertcontrols", function(t)
 	consoleplayer.cmd.forwardmove = -consoleplayer.cmd.forwardmove
 	consoleplayer.cmd.sidemove = -consoleplayer.cmd.sidemove
