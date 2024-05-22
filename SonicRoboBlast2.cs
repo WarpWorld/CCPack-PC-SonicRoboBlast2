@@ -63,7 +63,7 @@ namespace CrowdControl.Games.Packs.SonicRoboBlast2
                     },
                     new Effect("Give Lightning Shield", "lightningshield")
                     {
-                        Price = 10, Category = "Shields", Description = "Grants the player a fire shield."
+                        Price = 10, Category = "Shields", Description = "Grants the player a lightning shield."
                     },
 
                     new Effect("Change to Sonic", "changesonic")
