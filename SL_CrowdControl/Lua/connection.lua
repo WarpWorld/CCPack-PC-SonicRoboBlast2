@@ -18,6 +18,8 @@ local id = 0
 local message_queue = {}
 local bumpers = {} --list<(mobj, timer)>
 local rosies = {} --list<mobj>
+local bumperlockouttimer = 0
+local BUMPER_LOCKOUT_TIMER_MAX = 10 * TICRATE
 
 local deaths = 0
 local input_dirty = false -- if this flag is set, input parsing is deferred a tic
@@ -105,30 +107,37 @@ local function handle_message(msg)
 		-- test or start
 		if msg_type == 0 or msg_type == 1 then
 			local code = msg["code"]
+			if code == nil then
+				log_msg("[ERROR: Encountered null effect request!]")
+				return
+			end
 			local effect = effects[code]
 			if effect == nil or not (getmetatable(effect) == CCEffect.Meta) then
 				log_msg("Couldn't find effect '"..code.."'!")
 				create_response(id, UNAVAILABLE)
 			elseif effect.ready() and (not effect.is_timed or (effect.is_timed and (running_effects[effect.code] == nil))) then
-				if (cc_debug.value ~= 0) then
-					log_msg(tostring(msg["viewer"]).." activated effect '"..code.."' ("..tostring(id)..")!")
-				else
-					log_msg(tostring(msg["viewer"]).." activated effect '"..code.."'!")
-				end
 				local quantity = msg["quantity"]
 				if (quantity == nil) or (quantity == 0) then
 					quantity = 1
 				end
-				for i=1,quantity do
-					effect.update(0, msg["parameters"]) -- parameters may be nil
+				local result, out_msg = effect.update(0, quantity, msg["parameters"]) -- parameters may be nil
+				if result == nil then
+					result = SUCCESS
 				end
 				if effect.is_timed then
 					effect.duration = ((msg["duration"] * TICRATE) / 1000)
 					running_effects[effect.code] = {["timer"] = 0, ["id"] = id, ["was_ready"] = true}
 				end
-				create_response(id, SUCCESS, effect.duration)
+				create_response(id, result, effect.duration, out_msg)
+				if result == SUCCESS then
+					if (cc_debug.value ~= 0) then
+						log_msg(tostring(msg["viewer"]).." activated effect '"..code.."' ("..tostring(id)..")!")
+					else
+						log_msg(tostring(msg["viewer"]).." activated effect '"..code.."'!")
+					end
+				end
 			else
-				create_response(id, RETRY)
+				create_response(id, FAILED)
 			end
 		-- stop
 		elseif msg_type == 2 then
@@ -247,6 +256,10 @@ local function main_loop()
 	
 	if consoleplayer != nil then
 		consoleplayer.lives = (deaths % 99) + 1
+	end
+	
+	if bumperlockouttimer > 0 then
+		bumperlockouttimer = $ - 1
 	end
 	
 	for i,v in ipairs(bumpers) do
@@ -374,6 +387,10 @@ end
 	print("This is a demo!")
 end, default_ready)*/
 effects["bumper"] = CCEffect.New("bumper", function(t)
+	local minecart = minecart_check()
+	if not minecart and bumperlockouttimer > 0 then -- Put a cooldown on bumpers on minecarts, as they make progress near impossible with little counterplay
+		return FAILED, "Bumpers are restricted while riding a minecart"
+	end
 	local player = consoleplayer
 	local dir_x = cos(player.mo.angle)
 	local dir_y = sin(player.mo.angle)
@@ -382,6 +399,9 @@ effects["bumper"] = CCEffect.New("bumper", function(t)
 	local z = player.mo.z + player.mo.momz + P_RandomRange(-8, 8) * FRACUNIT
 	local mobj = P_SpawnMobj(x, y, z, MT_BUMPER)
 	table.insert(bumpers, {["bumper"]=mobj,["timer"]=0})
+	if minecart then
+		bumperlockouttimer = BUMPER_LOCKOUT_TIMER_MAX
+	end
 end, function() 
 	return default_ready() and zoomtube_check()
 end)
@@ -501,7 +521,6 @@ end, default_ready)
 
 local function check_skin(skin)
 	if not R_SkinUsable(consoleplayer, skin) then
-		create_response(id, UNAVAILABLE)
 		return false
 	end
 	return default_ready()
@@ -511,6 +530,8 @@ effects["changesonic"] = CCEffect.New("changesonic", function(t)
 	if R_SkinUsable(consoleplayer, "sonic") then
 		consoleplayer.mo.skin = "sonic"
 		R_SetPlayerSkin(consoleplayer, "sonic")
+	else
+		return UNAVAILABLE
 	end
 end, function()
 	return check_skin("sonic")
@@ -519,6 +540,8 @@ effects["changetails"] = CCEffect.New("changetails", function(t)
 	if R_SkinUsable(consoleplayer, "tails") then
 		consoleplayer.mo.skin = "tails"
 		R_SetPlayerSkin(consoleplayer, "tails")
+	else
+		return UNAVAILABLE
 	end
 end, function()
 	return check_skin("tails")
@@ -527,6 +550,8 @@ effects["changeknuckles"] = CCEffect.New("changeknuckles", function(t)
 	if R_SkinUsable(consoleplayer, "knuckles") then
 		consoleplayer.mo.skin = "knuckles"
 		R_SetPlayerSkin(consoleplayer, "knuckles")
+	else
+		return UNAVAILABLE
 	end
 end, function()
 	return check_skin("knuckles")
@@ -535,6 +560,8 @@ effects["changeamy"] = CCEffect.New("changeamy", function(t)
 	if R_SkinUsable(consoleplayer, "amy") then
 		consoleplayer.mo.skin = "amy"
 		R_SetPlayerSkin(consoleplayer, "amy")
+	else
+		return UNAVAILABLE
 	end
 end, function()
 	return check_skin("amy")
@@ -543,6 +570,8 @@ effects["changefang"] = CCEffect.New("changefang", function(t)
 	if R_SkinUsable(consoleplayer, "fang") then
 		consoleplayer.mo.skin = "fang"
 		R_SetPlayerSkin(consoleplayer, "fang")
+	else
+		return UNAVAILABLE
 	end
 end,  function()
 	return check_skin("fang")
@@ -551,6 +580,8 @@ effects["changemetal"] = CCEffect.New("changemetal", function(t)
 	if R_SkinUsable(consoleplayer, "metalsonic") then
 		consoleplayer.mo.skin = "metalsonic"
 		R_SetPlayerSkin(consoleplayer, "metalsonic")
+	else
+		return UNAVAILABLE
 	end
 end,  function()
 	return check_skin("metalsonic")
@@ -558,8 +589,13 @@ end)
 effects["changerandom"] = CCEffect.New("changerandom", function(t)
 	local oldskin = consoleplayer.mo.skin
 	local skin = skins[P_RandomKey(#skins)]
+	local tries = 0
 	while not (skin.valid) or (oldskin == skin) or not R_SkinUsable(consoleplayer, skin.name) do
 		skin = skins[P_RandomKey(#skins)]
+		tries = $ + 1
+		if tries == #skins then
+			return UNAVAILABLE -- no skin can be selected, might be due to forcecharacter, disable this effect anyways
+		end
 	end
 	consoleplayer.mo.skin = skin.name
 	R_SetPlayerSkin(consoleplayer, skin.name)
