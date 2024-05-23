@@ -20,6 +20,7 @@ local bumpers = {} --list<(mobj, timer)>
 local rosies = {} --list<mobj>
 local bumperlockouttimer = 0
 local BUMPER_LOCKOUT_TIMER_MAX = 10 * TICRATE
+local minecart_eject_player = false
 
 local deaths = 0
 local input_dirty = false -- if this flag is set, input parsing is deferred a tic
@@ -313,6 +314,26 @@ end
 
 addHook("BossDeath", brak_fix, MT_CYBRAKDEMON)
 
+local function minecart_thinker(mobj)
+	if not mobj.valid or not (mobj.health > 0) or not mobj.target or not mobj.target.valid then
+		return false -- no passenger or destroyed already
+	end
+	if minecart_eject_player then
+		if mobj.target.player == consoleplayer then
+			if consoleplayer and (consoleplayer.powers[pw_carry] == CR_MINECART) then
+				consoleplayer.powers[pw_carry] = 0
+				mobj.target.momx = mobj.momx
+				mobj.target.momy = mobj.momy
+				mobj.target = nil
+			end
+			minecart_eject_player = false -- we tried ¯\_(ツ)_/¯
+		end
+	end
+	return false
+end
+
+addHook("MobjThinker", minecart_thinker, MT_MINECART)
+
 -- HUD Drawer ==================================================================
 
 local function drawRunningEffects(drawer, player, cam)
@@ -399,7 +420,7 @@ effects["bumper"] = CCEffect.New("bumper", function(t)
 	local z = player.mo.z + player.mo.momz + P_RandomRange(-8, 8) * FRACUNIT
 	local mobj = P_SpawnMobj(x, y, z, MT_BUMPER)
 	table.insert(bumpers, {["bumper"]=mobj,["timer"]=0})
-	if minecart then
+	if not minecart then
 		bumperlockouttimer = BUMPER_LOCKOUT_TIMER_MAX
 	end
 end, function() 
@@ -420,6 +441,10 @@ effects["kill"] = CCEffect.New("kill", function(t)
 	end
 end, default_ready)
 effects["slap"] = CCEffect.New("slap", function(t)
+	local minecart = minecart_check()
+	if not minecart then
+		minecart_eject_player = true
+	end
 	P_DoPlayerPain(consoleplayer, consoleplayer.mo, consoleplayer.mo)
 end, function() 
 	return default_ready() and nights_check() and zoomtube_check()
