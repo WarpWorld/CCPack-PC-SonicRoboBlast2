@@ -1,4 +1,4 @@
-local CCEFFECT_VERSION = {0, 0, 1}
+local CCEFFECT_VERSION = {0, 0, 2}
 local LOADED_VERSION = rawget(_G, "CCEFFECT_LIB_VERSION")
 
 if LOADED_VERSION != nil then
@@ -32,7 +32,7 @@ rawset(_G, "CCEFFECT_LIB_VERSION", CCEFFECT_VERSION)
 local CCEffect = {}
 CCEffect.Meta = {}
 
-CCEffect.New = function(code, func, ready_func, duration) -- string, function(remainingtime), number
+CCEffect.New = function(code, func, ready_func, duration) -- string, function(remainingtime), function, number
 	if duration == nil then
 		duration = 0
 	end
@@ -66,5 +66,28 @@ CCEffect.Meta = {
 }
 
 registerMetatable(CCEffect.Meta);
+
+local CCEffect_ClassMeta = {
+	__add = nil,
+	__sub = nil,
+	__mul = nil,
+	__div = nil,
+	__pow = nil,
+	__unm = nil,
+	__concat = nil,
+	__len = nil,
+	__eq = nil,
+	__lt = nil,
+	__le = nil,
+	__index = nil,
+	__newindex = nil,
+	__usedindex = nil,
+	__call = function(class, ...)
+		return CCEffect.New(...)
+	end
+}
+
+registerMetatable(CCEffect_ClassMeta);
+setmetatable(CCEffect, CCEffect_ClassMeta)
 
 rawset(_G, "CCEffect", CCEffect);

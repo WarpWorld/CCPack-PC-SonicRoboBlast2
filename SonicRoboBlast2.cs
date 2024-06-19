@@ -86,7 +86,16 @@ namespace CrowdControl.Games.Packs.SonicRoboBlast2
                     {
                         Price = 10, Category = "Characters",
                         Description = "Sets the player character to a random character."
-                    }
+                    },
+                    new Effect("Emote Heart", "emoteheart")
+                    {
+                        Price = 1, Category = "Emotes",
+                        Description = "Send the player some lovely encouragement."
+                    },
+                    new Effect("Emote Pog", "emotepog")
+                        { Price = 1, Category = "Emotes" },
+                    new Effect("Emote No Way", "emotenoway") 
+                        { Price = 1, Category = "Emotes" }
                 ];
                 return effects;
             }

@@ -134,7 +134,7 @@ local function handle_message(msg)
 					if (cc_debug.value ~= 0) then
 						log_msg(tostring(msg["viewer"]).." activated effect '"..code.."' ("..tostring(id)..")!")
 					else
-						log_msg(tostring(msg["viewer"]).." activated effect '"..code.."'!")
+						log_msg_silent(tostring(msg["viewer"]).." activated effect '"..code.."'!")
 					end
 				end
 			else
@@ -382,14 +382,18 @@ local function drawRunningEffects(drawer, player, cam)
 end
 
 
-customhud.SetupItem("cc_debuffs", "crowd_control", drawRunningEffects, "game");
+customhud.SetupItem("cc_debuffs", "crowd_control", drawRunningEffects, "game")
 
 
 -- Effects =====================================================================
 
 local function default_ready()
 	-- only run while in a level, not paused and not exiting a stage
-	return gamestate == GS_LEVEL and not paused and not (consoleplayer == nil) and (consoleplayer.playerstate == PST_LIVE) and not (consoleplayer.exiting > 0)
+	return gamestate == GS_LEVEL and not paused and exit_check()
+end
+
+local function exit_check()
+	return not (consoleplayer == nil) and (consoleplayer.playerstate == PST_LIVE) and not (consoleplayer.exiting > 0)
 end
 
 local function nights_check()
@@ -404,10 +408,10 @@ local function minecart_check()
 	return not (consoleplayer == nil) and consoleplayer.powers[pw_carry] != CR_MINECART
 end
 
-/*effects["demo"] = CCEffect.New("demo", function(t)
+/*effects["demo"] = CCEffect("demo", function(t)
 	print("This is a demo!")
 end, default_ready)*/
-effects["bumper"] = CCEffect.New("bumper", function(t)
+effects["bumper"] = CCEffect("bumper", function(t)
 	local minecart = minecart_check()
 	if not minecart and bumperlockouttimer > 0 then -- Put a cooldown on bumpers on minecarts, as they make progress near impossible with little counterplay
 		return FAILED, "Bumpers are restricted while riding a minecart"
@@ -426,11 +430,11 @@ effects["bumper"] = CCEffect.New("bumper", function(t)
 end, function() 
 	return default_ready() and zoomtube_check()
 end)
-effects["giverings"] = CCEffect.New("giverings", function(t)
+effects["giverings"] = CCEffect("giverings", function(t)
 	consoleplayer.rings = $ + 1
 	S_StartSound(consoleplayer.mo, sfx_itemup)
 end, default_ready)
-effects["kill"] = CCEffect.New("kill", function(t)
+effects["kill"] = CCEffect("kill", function(t)
 	if maptol & TOL_NIGHTS == 0 then
 		P_DamageMobj(consoleplayer.mo, nil, nil, 1, DMG_INSTAKILL)
 		P_DamageMobj(consoleplayer.mo, nil, nil, 1, DMG_SPECTATOR)
@@ -440,7 +444,7 @@ effects["kill"] = CCEffect.New("kill", function(t)
 		consoleplayer.rings = 0
 	end
 end, default_ready)
-effects["slap"] = CCEffect.New("slap", function(t)
+effects["slap"] = CCEffect("slap", function(t)
 	local minecart = minecart_check()
 	if not minecart then
 		minecart_eject_player = true
@@ -449,33 +453,33 @@ effects["slap"] = CCEffect.New("slap", function(t)
 end, function() 
 	return default_ready() and nights_check() and zoomtube_check()
 end)
-effects["sneakers"] = CCEffect.New("sneakers", function(t)
+effects["sneakers"] = CCEffect("sneakers", function(t)
 	consoleplayer.powers[pw_sneakers] = sneakertics
 	P_PlayJingle(consoleplayer, JT_SHOES)
 end, function()
 	return default_ready() and (consoleplayer.powers[pw_sneakers] == 0) and nights_check()
 end)
-effects["invulnerability"] = CCEffect.New("invulnerability", function(t)
+effects["invulnerability"] = CCEffect("invulnerability", function(t)
 	consoleplayer.powers[pw_invulnerability] = invulntics
 	P_PlayJingle(consoleplayer, JT_INV)
 end, function()
 	return default_ready() and (consoleplayer.powers[pw_invulnerability] == 0) and nights_check()
 end)
 
-effects["nojump"] = CCEffect.New("nojump", function(t)
+effects["nojump"] = CCEffect("nojump", function(t)
 	consoleplayer.cmd.buttons = consoleplayer.cmd.buttons & ~BT_JUMP
 end, function() 
 	return default_ready() and minecart_check()
 end, 10 * TICRATE)
-effects["nospin"] = CCEffect.New("nospin", function(t)
+effects["nospin"] = CCEffect("nospin", function(t)
 	consoleplayer.cmd.buttons = consoleplayer.cmd.buttons & ~BT_SPIN
 end, default_ready, 10 * TICRATE)
-effects["invertcontrols"] = CCEffect.New("invertcontrols", function(t)
+effects["invertcontrols"] = CCEffect("invertcontrols", function(t)
 	consoleplayer.cmd.forwardmove = -consoleplayer.cmd.forwardmove
 	consoleplayer.cmd.sidemove = -consoleplayer.cmd.sidemove
 end, default_ready, 15 * TICRATE)
 
-effects["crawla"] = CCEffect.New("crawla", function(t)
+effects["crawla"] = CCEffect("crawla", function(t)
 	local play_mo = consoleplayer.mo
 	local dir_x = cos(play_mo.angle)
 	local dir_y = sin(play_mo.angle)
@@ -488,7 +492,7 @@ effects["crawla"] = CCEffect.New("crawla", function(t)
 end, function()
 	return default_ready() and nights_check()
 end)
-effects["rosy"] = CCEffect.New("rosy", function(t)
+effects["rosy"] = CCEffect("rosy", function(t)
 	local play_mo = consoleplayer.mo
 	local dir_x = cos(play_mo.angle)
 	local dir_y = sin(play_mo.angle)
@@ -503,7 +507,7 @@ effects["rosy"] = CCEffect.New("rosy", function(t)
 end, function()
 	return default_ready() and nights_check()
 end)
-effects["commander"] = CCEffect.New("commander", function(t)
+effects["commander"] = CCEffect("commander", function(t)
 	local play_mo = consoleplayer.mo
 	local dir_x = cos(play_mo.angle)
 	local dir_y = sin(play_mo.angle)
@@ -515,28 +519,28 @@ effects["commander"] = CCEffect.New("commander", function(t)
 	mobj.eflags = $ | play_mo.eflags & MFE_VERTICALFLIP
 end, default_ready)
 
-effects["pityshield"] = CCEffect.New("pityshield", function(t)
+effects["pityshield"] = CCEffect("pityshield", function(t)
 	if consoleplayer.powers[pw_shield] ~= SH_PITY then
 		S_StartSound(consoleplayer.mo, sfx_shield)
 	end
 	consoleplayer.powers[pw_shield] = SH_PITY
 	P_SpawnShieldOrb(consoleplayer)
 end, default_ready)
-effects["fireshield"] = CCEffect.New("fireshield", function(t)
+effects["fireshield"] = CCEffect("fireshield", function(t)
 	if consoleplayer.powers[pw_shield] ~= SH_FLAMEAURA then
 		S_StartSound(consoleplayer.mo, sfx_s3k3e)
 	end
 	consoleplayer.powers[pw_shield] = SH_FLAMEAURA
 	P_SpawnShieldOrb(consoleplayer)
 end, default_ready)
-effects["bubbleshield"] = CCEffect.New("bubbleshield", function(t)
+effects["bubbleshield"] = CCEffect("bubbleshield", function(t)
 	if consoleplayer.powers[pw_shield] ~= SH_BUBBLEWRAP then
 		S_StartSound(consoleplayer.mo, sfx_s3k3f)
 	end
 	consoleplayer.powers[pw_shield] = SH_BUBBLEWRAP
 	P_SpawnShieldOrb(consoleplayer)
 end, default_ready)
-effects["lightningshield"] = CCEffect.New("lightningshield", function(t)
+effects["lightningshield"] = CCEffect("lightningshield", function(t)
 	if consoleplayer.powers[pw_shield] ~= SH_THUNDERCOIN then
 		S_StartSound(consoleplayer.mo, sfx_s3k41)
 	end
@@ -551,7 +555,7 @@ local function check_skin(skin)
 	return default_ready()
 end
 
-effects["changesonic"] = CCEffect.New("changesonic", function(t)
+effects["changesonic"] = CCEffect("changesonic", function(t)
 	if R_SkinUsable(consoleplayer, "sonic") then
 		consoleplayer.mo.skin = "sonic"
 		R_SetPlayerSkin(consoleplayer, "sonic")
@@ -561,7 +565,7 @@ effects["changesonic"] = CCEffect.New("changesonic", function(t)
 end, function()
 	return check_skin("sonic")
 end)
-effects["changetails"] = CCEffect.New("changetails", function(t)
+effects["changetails"] = CCEffect("changetails", function(t)
 	if R_SkinUsable(consoleplayer, "tails") then
 		consoleplayer.mo.skin = "tails"
 		R_SetPlayerSkin(consoleplayer, "tails")
@@ -571,7 +575,7 @@ effects["changetails"] = CCEffect.New("changetails", function(t)
 end, function()
 	return check_skin("tails")
 end)
-effects["changeknuckles"] = CCEffect.New("changeknuckles", function(t)
+effects["changeknuckles"] = CCEffect("changeknuckles", function(t)
 	if R_SkinUsable(consoleplayer, "knuckles") then
 		consoleplayer.mo.skin = "knuckles"
 		R_SetPlayerSkin(consoleplayer, "knuckles")
@@ -581,7 +585,7 @@ effects["changeknuckles"] = CCEffect.New("changeknuckles", function(t)
 end, function()
 	return check_skin("knuckles")
 end)
-effects["changeamy"] = CCEffect.New("changeamy", function(t)
+effects["changeamy"] = CCEffect("changeamy", function(t)
 	if R_SkinUsable(consoleplayer, "amy") then
 		consoleplayer.mo.skin = "amy"
 		R_SetPlayerSkin(consoleplayer, "amy")
@@ -591,27 +595,27 @@ effects["changeamy"] = CCEffect.New("changeamy", function(t)
 end, function()
 	return check_skin("amy")
 end)
-effects["changefang"] = CCEffect.New("changefang", function(t)
+effects["changefang"] = CCEffect("changefang", function(t)
 	if R_SkinUsable(consoleplayer, "fang") then
 		consoleplayer.mo.skin = "fang"
 		R_SetPlayerSkin(consoleplayer, "fang")
 	else
 		return UNAVAILABLE
 	end
-end,  function()
+end, function()
 	return check_skin("fang")
 end)
-effects["changemetal"] = CCEffect.New("changemetal", function(t)
+effects["changemetal"] = CCEffect("changemetal", function(t)
 	if R_SkinUsable(consoleplayer, "metalsonic") then
 		consoleplayer.mo.skin = "metalsonic"
 		R_SetPlayerSkin(consoleplayer, "metalsonic")
 	else
 		return UNAVAILABLE
 	end
-end,  function()
+end, function()
 	return check_skin("metalsonic")
 end)
-effects["changerandom"] = CCEffect.New("changerandom", function(t)
+effects["changerandom"] = CCEffect("changerandom", function(t)
 	local oldskin = consoleplayer.mo.skin
 	local skin = skins[P_RandomKey(#skins)]
 	local tries = 0
@@ -625,3 +629,20 @@ effects["changerandom"] = CCEffect.New("changerandom", function(t)
 	consoleplayer.mo.skin = skin.name
 	R_SetPlayerSkin(consoleplayer, skin.name)
 end, default_ready)
+
+
+effects["emoteheart"] = CCEffect("emoteheart", function(t)
+	table.insert(cc_emotes, CCEmote("EMOTLOVE"))
+end, function()
+	return true
+end)
+effects["emotepog"] = CCEffect("emotepog", function(t)
+	table.insert(cc_emotes, CCEmote("EMOTPOGS"))
+end, function()
+	return true
+end)
+effects["emotenoway"] = CCEffect("emotenoway", function(t)
+	table.insert(cc_emotes, CCEmote("EMOTNOWY"))
+end, function()
+	return true
+end)
