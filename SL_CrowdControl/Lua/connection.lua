@@ -21,6 +21,8 @@ local rosies = {} --list<mobj>
 local bumperlockouttimer = 0
 local BUMPER_LOCKOUT_TIMER_MAX = 10 * TICRATE
 local minecart_eject_player = false
+local bonusfang_returnvector = nil
+local escaped_fang = false
 
 local deaths = 0
 local input_dirty = false -- if this flag is set, input parsing is deferred a tic
@@ -292,6 +294,24 @@ local function on_map_loaded(mapnum)
 			table.remove(rosies, i)
 		end
 	end
+	if escaped_fang and bonusfang_returnvector != nil and bonusfang_returnvector.map == mapnum then
+		-- Fang defeated, let's reset the player's state
+		local pos = bonusfang_returnvector.xyz
+		local mom = bonusfang_returnvector.mom_xyz
+		local starpost_pos = bonusfang_returnvector.starpost_xyz
+		P_SetOrigin(consoleplayer.mo, pos[1], pos[2], pos[3])
+		consoleplayer.mo.angle = bonusfang_returnvector.angle
+		consoleplayer.mo.state = bonusfang_returnvector.state
+		consoleplayer.drawangle = bonusfang_returnvector.angle
+		consoleplayer.mo.momx, consoleplayer.mo.momy, consoleplayer.mo.momz = mom_xyz[1], mom_xyz[2], mom_xyz[3]
+		consoleplayer.realtime, consoleplayer.rings = bonusfang_returnvector.realtime, bonusfang_returnvector.rings
+		consoleplayer.starpost_x, consoleplayer.starpost_y, consoleplayer.starpost_z = starpost_pos[1], starpost_pos[2], starpost_pos[3]
+		consoleplayer.starpost_angle = bonusfang_returnvector.starpost_angle
+		consoleplayer.starpost_time = bonusfang_returnvector.starpost_time
+		consoleplayer.starpost_num = bonusfang_returnvector.starpost_num
+		escaped_fang = false
+		bonusfang_returnvector = nil
+	end
 end
 
 addHook("MapLoad", on_map_loaded)
@@ -313,6 +333,16 @@ local function brak_fix(boss)
 end
 
 addHook("BossDeath", brak_fix, MT_CYBRAKDEMON)
+
+local function bonusfang_handler(boss)
+	if bonusfang_returnvector != nil then
+		escaped_fang = true
+		G_SetCustomExitVars(bonusfang_returnvector.map)
+		G_ExitLevel()
+	end
+end
+
+addHook("BossDeath", bonusfang_handler, MT_FANG)
 
 local function minecart_thinker(mobj)
 	if not mobj.valid or not (mobj.health > 0) or not mobj.target or not mobj.target.valid then
@@ -645,4 +675,34 @@ effects["emotenoway"] = CCEffect("emotenoway", function(t)
 	table.insert(cc_emotes, CCEmote("EMOTNOWY"))
 end, function()
 	return true
+end)
+
+effects["bonusfang"] = CCEffect("bonusfang", function(t)
+	bonusfang_returnvector = {
+		["map"] = gamemap,
+		["xyz"] = {consoleplayer.mo.x, consoleplayer.mo.y, consoleplayer.mo.z},
+		["mom_xyz"] = {consoleplayer.mo.momx, consoleplayer.mo.momy, consoleplayer.mo.momz},
+		["state"] = consoleplayer.mo.state,
+		["starpost_xyz"] = {consoleplayer.starpost_x, consoleplayer.starpost_y, consoleplayer.starpost_z},
+		["starpost_angle"] = consoleplayer.starpost_angle,
+		["starpost_time"] = consoleplayer.realtime,
+		["starpost_num"] = consoleplayer.starpost_num,
+		["realtime"] = consoleplayer.realtime,
+		["rings"] = consoleplayer.rings,
+		["score"] = consoleplayer.score,
+		["angle"] = consoleplayer.mo.angle,
+	}
+	escaped_fang = false
+	G_SetCustomExitVars(15, 2) -- 2 -> skip stats and cutscene
+	G_ExitLevel()
+end, function()
+	local mapinfo = mapheaderinfo[15]
+	-- heuristics, to make sure it's not another mods' level 15
+	if mapinfo == nil or not (mapinfo.keywords == "ACZ3"
+			and (mapinfo.bonustype == 1) -- Boss
+			and (mapinfo.levelflags & LF_WARNINGTITLE != 0) 
+			and (mapinfo.musname == "VSFANG")) then
+		return false
+	end
+	return (bonusfang_returnvector == nil) and default_ready()
 end)

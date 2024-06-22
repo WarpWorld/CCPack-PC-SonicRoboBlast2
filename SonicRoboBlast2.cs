@@ -95,7 +95,12 @@ namespace CrowdControl.Games.Packs.SonicRoboBlast2
                     new Effect("Emote Pog", "emotepog")
                         { Price = 1, Category = "Emotes" },
                     new Effect("Emote No Way", "emotenoway") 
-                        { Price = 1, Category = "Emotes" }
+                        { Price = 1, Category = "Emotes" },
+                    new Effect("Bonus Fang", "bonusfang")
+                    {
+                        Price = 100, Disabled = true,
+                        Description = "Fang takes the player on a little journey."
+                    }
                 ];
                 return effects;
             }
