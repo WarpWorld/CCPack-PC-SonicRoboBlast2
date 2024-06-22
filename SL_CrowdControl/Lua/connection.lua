@@ -417,13 +417,13 @@ customhud.SetupItem("cc_debuffs", "crowd_control", drawRunningEffects, "game")
 
 -- Effects =====================================================================
 
+local function exit_check()
+	return not (consoleplayer == nil) and (consoleplayer.playerstate == PST_LIVE) and not (consoleplayer.exiting > 0)
+end
+
 local function default_ready()
 	-- only run while in a level, not paused and not exiting a stage
 	return gamestate == GS_LEVEL and not paused and exit_check()
-end
-
-local function exit_check()
-	return not (consoleplayer == nil) and (consoleplayer.playerstate == PST_LIVE) and not (consoleplayer.exiting > 0)
 end
 
 local function nights_check()
