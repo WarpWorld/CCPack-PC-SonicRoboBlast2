@@ -678,6 +678,14 @@ end, function()
 end)
 
 effects["bonusfang"] = CCEffect("bonusfang", function(t)
+	local mapinfo = mapheaderinfo[15]
+	-- heuristics, to make sure it's not another mods' level 15
+	if mapinfo == nil or not (mapinfo.keywords == "ACZ3"
+			and (mapinfo.bonustype == 1) -- Boss
+			and (mapinfo.levelflags & LF_WARNINGTITLE != 0) 
+			and (mapinfo.musname == "VSFANG")) then
+		return UNAVALIABLE
+	end
 	bonusfang_returnvector = {
 		["map"] = gamemap,
 		["xyz"] = {consoleplayer.mo.x, consoleplayer.mo.y, consoleplayer.mo.z},
@@ -696,13 +704,5 @@ effects["bonusfang"] = CCEffect("bonusfang", function(t)
 	G_SetCustomExitVars(15, 2) -- 2 -> skip stats and cutscene
 	G_ExitLevel()
 end, function()
-	local mapinfo = mapheaderinfo[15]
-	-- heuristics, to make sure it's not another mods' level 15
-	if mapinfo == nil or not (mapinfo.keywords == "ACZ3"
-			and (mapinfo.bonustype == 1) -- Boss
-			and (mapinfo.levelflags & LF_WARNINGTITLE != 0) 
-			and (mapinfo.musname == "VSFANG")) then
-		return false
-	end
 	return (bonusfang_returnvector == nil) and default_ready()
 end)
