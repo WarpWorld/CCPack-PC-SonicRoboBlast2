@@ -684,7 +684,7 @@ effects["bonusfang"] = CCEffect("bonusfang", function(t)
 			and (mapinfo.bonustype == 1) -- Boss
 			and (mapinfo.levelflags & LF_WARNINGTITLE != 0) 
 			and (mapinfo.musname == "VSFANG")) then
-		return UNAVALIABLE
+		return UNAVAILABLE
 	end
 	bonusfang_returnvector = {
 		["map"] = gamemap,
