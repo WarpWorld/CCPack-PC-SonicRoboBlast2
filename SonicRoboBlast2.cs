@@ -10,7 +10,7 @@ class SonicRoboBlast2 : FileEffectPack
     public override string WriteFile => "/luafiles/client/crowd_control/input.txt"; //GameFolder + "/luafiles/client/crowd_control/input.txt";
     public static string ReadyCheckFile = "/luafiles/client/crowd_control/connector.txt"; //GameFolder + "/luafiles/client/crowd_control/connector.txt";
 
-    public override Game Game => new("Sonic Robo Blast 2", "SonicRoboBlast2", "PC", ConnectorType.FileConnector);
+    public override Game Game { get; } = new("Sonic Robo Blast 2", "SonicRoboBlast2", "PC", ConnectorType.FileConnector);
 
     public override EffectList Effects
     {
