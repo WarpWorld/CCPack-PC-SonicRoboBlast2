@@ -109,6 +109,11 @@ class SonicRoboBlast2 : FileEffectPack
     public SonicRoboBlast2(UserRecord player, Func<CrowdControlBlock, bool> responseHandler, Action<object> statusUpdateHandler) : base(player, responseHandler, statusUpdateHandler)
     {
     }
+    
+    protected override GameState GetGameState()
+    {
+        return IsReady() ? GameState.Ready : GameState.Paused;
+    }
 
     static bool IsReady()
     {
