@@ -390,8 +390,6 @@ local function P_GetPlayerColor(player)
 
 	return player.skincolor
 end
-
-local vc_cooplives = CV_FindVar("cooplives")
 	
 local emeraldpics = nil
 -- (st_stuff.c) ST_drawLivesArea()
@@ -410,26 +408,26 @@ local function drawDeathCounter(drawer, player, cam)
 	local facecolor = P_GetPlayerColor(player)
 	
 	if player.spectator then
-		local colormap = drawer.getColormap(player.skin, facecolor)
+		local colormap = drawer.getColormap(TC_DEFAULT, SKINCOLOR_CLOUDY)
 		local face = drawer.getSprite2Patch(player.skin, SPR2_XTRA, false, A)
-		drawer.drawScaled(frac_x, frac_y, FRACUNIT/2, face, livehud.f|V_PERPLAYER|V_HUDTRANSHALF)
+		drawer.drawScaled(frac_x, frac_y, FRACUNIT/2, face, livehud.f|V_PERPLAYER|V_HUDTRANSHALF, colormap)
 	elseif player.mo and player.mo.color then
-		local colormap = drawer.getColormap(player.skin, player.mo.color)
+		local colormap = drawer.getColormap(TC_DEFAULT, player.mo.color)
 		local use_super = player.powers[pw_super] and not (player.charflags & SF_NOSUPERSPRITES)
 		local face = drawer.getSprite2Patch(player.skin, SPR2_XTRA, use_super, A)
-		drawer.drawScaled(frac_x, frac_y, FRACUNIT/2, face, livehud.f|V_PERPLAYER|V_HUDTRANS)
+		drawer.drawScaled(frac_x, frac_y, FRACUNIT/2, face, livehud.f|V_PERPLAYER|V_HUDTRANS, colormap)
 		if player.powers[pw_super] == 1 and player.mo.tracer then
 			local supertrans = (player.mo.tracer.frame & FF_TRANSMASK) >> FF_TRANSSHIFT
 			if supertrans < 10 then
 				supertrans = $ << V_ALPHASHIFT
-				colormap = drawer.getColormap(player.skin, player.mo.tracer.color)
-				drawer.drawScaled(frac_x, frac_y, FRACUNIT/2, face, livehud.f|V_PERPLAYER|supertrans)
+				colormap = drawer.getColormap(TC_DEFAULT, player.mo.tracer.color)
+				drawer.drawScaled(frac_x, frac_y, FRACUNIT/2, face, livehud.f|V_PERPLAYER|supertrans, colormap)
 			end
 		end
 	elseif facecolor then
-		local colormap = drawer.getColormap(player.skin, facecolor)
+		local colormap = drawer.getColormap(TC_DEFAULT, facecolor)
 		local face = drawer.getSprite2Patch(player.skin, SPR2_XTRA, false, A)
-		drawer.drawScaled(frac_x, frac_y, FRACUNIT/2, face, livehud.f|V_PERPLAYER|V_HUDTRANS)
+		drawer.drawScaled(frac_x, frac_y, FRACUNIT/2, face, livehud.f|V_PERPLAYER|V_HUDTRANS, colormap)
 	end
 	
 	// Metal Sonic recording
