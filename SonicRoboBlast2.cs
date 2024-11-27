@@ -98,8 +98,8 @@ class SonicRoboBlast2 : FileEffectPack
                     { Price = 1, Category = "Emotes" },
                 new Effect("Bonus Fang", "bonusfang")
                 {
-                    Price = 100, Disabled = true,
-                    Description = "Fang takes the player on a little journey."
+                    Price = 100, Inactive = true,
+                    Description = "(Unstable?) Fang takes the player on a little journey."
                 }
             ];
             return effects;
@@ -109,7 +109,7 @@ class SonicRoboBlast2 : FileEffectPack
     public SonicRoboBlast2(UserRecord player, Func<CrowdControlBlock, bool> responseHandler, Action<object> statusUpdateHandler) : base(player, responseHandler, statusUpdateHandler)
     {
     }
-    
+
     protected override GameState GetGameState()
     {
         return IsReady() ? GameState.Ready : GameState.Paused;

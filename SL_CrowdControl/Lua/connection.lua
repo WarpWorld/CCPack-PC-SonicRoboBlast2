@@ -306,7 +306,7 @@ local function on_map_loaded(mapnum)
 		consoleplayer.mo.angle = bonusfang_returnvector.angle
 		consoleplayer.mo.state = bonusfang_returnvector.state
 		consoleplayer.drawangle = bonusfang_returnvector.angle
-		consoleplayer.mo.momx, consoleplayer.mo.momy, consoleplayer.mo.momz = mom_xyz[1], mom_xyz[2], mom_xyz[3]
+		consoleplayer.mo.momx, consoleplayer.mo.momy, consoleplayer.mo.momz = mom[1], mom[2], mom[3]
 		consoleplayer.realtime, consoleplayer.rings = bonusfang_returnvector.realtime, bonusfang_returnvector.rings
 		consoleplayer.starpost_x, consoleplayer.starpost_y, consoleplayer.starpost_z = starpost_pos[1], starpost_pos[2], starpost_pos[3]
 		consoleplayer.starpost_angle = bonusfang_returnvector.starpost_angle
@@ -826,6 +826,9 @@ effects["bonusfang"] = CCEffect("bonusfang", function(t)
 			and (mapinfo.bonustype == 1) -- Boss
 			and (mapinfo.levelflags & LF_WARNINGTITLE != 0) 
 			and (mapinfo.musname == "VSFANG")) then
+		return UNAVAILABLE
+	end
+	if gamemap == 15 then
 		return UNAVAILABLE
 	end
 	bonusfang_returnvector = {
