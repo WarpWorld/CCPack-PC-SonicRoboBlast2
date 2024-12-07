@@ -281,6 +281,8 @@ addHook("PreThinkFrame", main_loop)
 -- quitting: true if the application is exiting, false if returning to titlescreen
 local function on_game_quit(quitting)
 	deaths = 0
+	escaped_fang = false
+	bonusfang_returnvector = nil
 	if quitting then
 		open_local(ready_path, "w"):close()
 	end
