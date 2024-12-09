@@ -1,4 +1,4 @@
-local CCEFFECT_VERSION = {0, 0, 2}
+local CCEFFECT_VERSION = {0, 0, 3}
 local LOADED_VERSION = rawget(_G, "CCEFFECT_LIB_VERSION")
 
 if LOADED_VERSION != nil then
@@ -32,18 +32,24 @@ rawset(_G, "CCEFFECT_LIB_VERSION", CCEFFECT_VERSION)
 local CCEffect = {}
 CCEffect.Meta = {}
 
-CCEffect.New = function(code, func, ready_func, duration) -- string, function(remainingtime), function, number
-	if duration == nil then
+CCEffect.New = function(code, func, ready_func, duration, icon) -- string, function(remainingtime), function, number, string
+	if duration == nil or not (type(duration) == "number") then
 		duration = 0
+	end
+	if icon == nil or not (type(icon) == "string") then
+		icon = ""
 	end
 	local cceffect = {}
 	setmetatable(cceffect, CCEffect.Meta)
 	cceffect.code = code
+	-- can return CCEffectStatus, string
 	cceffect.update = func
+	-- can return bool, string
 	cceffect.ready = ready_func
 	-- 35 ticks per second
 	cceffect.duration = duration
 	cceffect.is_timed = not (duration == 0)
+	cceffect.icon = icon
 	return cceffect
 end
 

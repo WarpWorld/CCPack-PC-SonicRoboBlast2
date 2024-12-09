@@ -7,3 +7,7 @@ dofile("util/CCEffect.lua")
 dofile("util/CCEmote.lua")
 
 dofile("connection.lua")
+dofile("effects.lua")
+
+dofile("liveHUD.lua")
+
