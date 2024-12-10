@@ -1,9 +1,9 @@
-local ready_path = "client/crowd_control/connector.txt"
+local state_path = "client/crowd_control/connector.txt"
 local input_path = "client/crowd_control/input.txt"
 local output_path = "client/crowd_control/output.txt"
 local log_path = "client/crowd_control/latest-log.txt"
 
-local ready_file
+local state_file
 local input_file
 local output_file
 local log_file
@@ -171,9 +171,9 @@ local function setup_cc_effects()
 		log_msg(k)
 	end
 	log_msg("Effects loaded")
-	ready_file = open_local(ready_path, "w")
-	write_file(ready_file, "READY")
-	ready_file:close()
+	state_file = open_local(state_path, "w")
+	write_file(state_file, "READY")
+	state_file:close()
 end
 
 local function main_loop()
@@ -263,7 +263,7 @@ addHook("PreThinkFrame", main_loop)
 -- quitting: true if the application is exiting, false if returning to titlescreen
 local function on_game_quit(quitting)
 	if quitting then
-		open_local(ready_path, "w"):close()
+		open_local(state_path, "w"):close()
 	end
 end
 
