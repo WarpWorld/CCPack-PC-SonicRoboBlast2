@@ -335,6 +335,9 @@ cc_effects["bonusfang"] = CCEffect("bonusfang", function(t)
 	G_SetCustomExitVars(15, 2) -- 2 -> skip stats and cutscene
 	G_ExitLevel()
 end, function()
+	if nights_check() then
+		return false, "Unable to activate Bonus Fang as it disrupts Special Stage logic."
+	end
 	return (bonusfang_returnvector == nil) and default_ready()
 end)
 
