@@ -137,9 +137,6 @@ customhud.SetupItem("lives", "crowd_control", drawDeathCounter, "game", 0)
 -- quitting: true if the application is exiting, false if returning to titlescreen
 local function on_game_quit(quitting)
 	deaths = 0
-	if quitting then
-		open_local(ready_path, "w"):close()
-	end
 end
 
 addHook("GameQuit", on_game_quit)

@@ -259,6 +259,7 @@ local function main_loop()
 end
 
 addHook("PreThinkFrame", main_loop)
+addHook("IntermissionThinker", main_loop)
 
 -- quitting: true if the application is exiting, false if returning to titlescreen
 local function on_game_quit(quitting)
@@ -266,6 +267,8 @@ local function on_game_quit(quitting)
 		open_local(state_path, "w"):close()
 	end
 end
+
+addHook("GameQuit", on_game_quit)
 
 local function drawRunningEffects(drawer, player, cam)
 	local timers = {}

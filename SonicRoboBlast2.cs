@@ -100,6 +100,16 @@ class SonicRoboBlast2 : FileEffectPack
                 {
                     Price = 100, Inactive = true,
                     Description = "(Unstable?) Fang takes the player on a little journey."
+                },
+                new Effect("Squish Player", "squish")
+                {
+                    Duration = 15, Price = 5,
+                    Description = "Squish the player for a little while."
+                },
+                new Effect("Tall Player", "tall")
+                {
+                    Duration = 15, Price = 5,
+                    Description = "Make the player tall for a little while."
                 }
             ];
             return effects;

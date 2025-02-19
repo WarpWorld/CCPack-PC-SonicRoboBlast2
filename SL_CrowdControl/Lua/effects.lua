@@ -51,8 +51,8 @@ end, function()
 	return default_ready() and zoomtube_check()
 end)
 
-cc_effects["giverings"] = CCEffect("giverings", function(t)
-	consoleplayer.rings = $ + 1
+cc_effects["giverings"] = CCEffect("giverings", function(t, count)
+	consoleplayer.rings = $ + count
 	S_StartSound(consoleplayer.mo, sfx_itemup)
 end, default_ready)
 
@@ -315,17 +315,17 @@ cc_effects["bonusfang"] = CCEffect("bonusfang", function(t)
 		return CCEffectResponse.UNAVAILABLE
 	end
 	if gamemap == 15 then
-		return CCEffectResponse.UNAVAILABLE
+		return CCEffectResponse.FAILED
 	end
 	bonusfang_returnvector = {
 		["map"] = gamemap,
 		["xyz"] = {consoleplayer.mo.x, consoleplayer.mo.y, consoleplayer.mo.z},
 		["mom_xyz"] = {consoleplayer.mo.momx, consoleplayer.mo.momy, consoleplayer.mo.momz},
 		["state"] = consoleplayer.mo.state,
-		["starpost_xyz"] = {consoleplayer.starpost_x, consoleplayer.starpost_y, consoleplayer.starpost_z},
-		["starpost_angle"] = consoleplayer.starpost_angle,
+		["starpost_xyz"] = {consoleplayer.starpostx, consoleplayer.starposty, consoleplayer.starpostz},
+		["starpost_angle"] = consoleplayer.starpostangle,
 		["starpost_time"] = consoleplayer.realtime,
-		["starpost_num"] = consoleplayer.starpost_num,
+		["starpost_num"] = consoleplayer.starpostnum,
 		["realtime"] = consoleplayer.realtime,
 		["rings"] = consoleplayer.rings,
 		["score"] = consoleplayer.score,
@@ -335,11 +335,29 @@ cc_effects["bonusfang"] = CCEffect("bonusfang", function(t)
 	G_SetCustomExitVars(15, 2) -- 2 -> skip stats and cutscene
 	G_ExitLevel()
 end, function()
-	if nights_check() then
+	if not nights_check() then
 		return false, "Unable to activate Bonus Fang as it disrupts Special Stage logic."
 	end
 	return (bonusfang_returnvector == nil) and default_ready()
 end)
+
+local scale_active = false
+
+cc_effects["squish"] = CCEffect("squish", function(t)
+	consoleplayer.mo.spritexscale = 2*FRACUNIT
+	consoleplayer.mo.spriteyscale = FRACUNIT/4
+	scale_active = true
+end, function() 
+	return default_ready() and not (cc_running_effects["tall"] != nil and cc_running_effects["tall"]["was_ready"])
+end, 15 * TICRATE, "ICONSQSH")
+
+cc_effects["tall"] = CCEffect("tall", function(t)
+	consoleplayer.mo.spritexscale = FRACUNIT/4
+	consoleplayer.mo.spriteyscale = 2*FRACUNIT
+	scale_active = true
+end, function() 
+	return default_ready() and not (cc_running_effects["squish"] != nil and cc_running_effects["squish"]["was_ready"])
+end, 15 * TICRATE, "ICONTALL")
 
 --- ===== LUA HOOKS ============================================================
 
@@ -355,6 +373,15 @@ local function pre_think_frame()
 				P_RemoveMobj(v["bumper"])
 			end
 			table.remove(bumpers, i)
+		end
+	end
+	
+	if consoleplayer != nil and consoleplayer.mo != nil then
+		if scale_active and not ((cc_running_effects["squish"] != nil and cc_running_effects["squish"]["was_ready"]) 
+				or (cc_running_effects["tall"] != nil and cc_running_effects["tall"]["was_ready"])) then
+			scale_active = false
+			consoleplayer.mo.spritexscale = FRACUNIT
+			consoleplayer.mo.spriteyscale = FRACUNIT
 		end
 	end
 end
@@ -386,10 +413,10 @@ local function on_map_loaded(mapnum)
 		consoleplayer.drawangle = bonusfang_returnvector.angle
 		consoleplayer.mo.momx, consoleplayer.mo.momy, consoleplayer.mo.momz = mom[1], mom[2], mom[3]
 		consoleplayer.realtime, consoleplayer.rings = bonusfang_returnvector.realtime, bonusfang_returnvector.rings
-		consoleplayer.starpost_x, consoleplayer.starpost_y, consoleplayer.starpost_z = starpost_pos[1], starpost_pos[2], starpost_pos[3]
-		consoleplayer.starpost_angle = bonusfang_returnvector.starpost_angle
-		consoleplayer.starpost_time = bonusfang_returnvector.starpost_time
-		consoleplayer.starpost_num = bonusfang_returnvector.starpost_num
+		consoleplayer.starpostx, consoleplayer.starposty, consoleplayer.starpostz = starpost_pos[1], starpost_pos[2], (starpost_pos[3] + consoleplayer.mo.height)
+		consoleplayer.starpostangle = bonusfang_returnvector.starpost_angle
+		consoleplayer.starposttime = bonusfang_returnvector.starpost_time
+		consoleplayer.starpostnum = bonusfang_returnvector.starpost_num
 		escaped_fang = false
 		bonusfang_returnvector = nil
 	end
