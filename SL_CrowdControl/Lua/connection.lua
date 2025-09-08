@@ -20,6 +20,10 @@ rawset(_G, "CCEffectResponse", {
 	RESUMED = 7,
 	FINISHED = 8
 })
+local function CC_IsEffectRunning(effect)
+	return cc_running_effects[effect] != nil and cc_running_effects[effect]["was_ready"]
+end
+rawset(_G, "CC_IsEffectRunning", CC_IsEffectRunning)
 
 local keepalive_timer = 0
 local id = 0
@@ -114,11 +118,12 @@ local function handle_message(msg)
 			else
 				local ready, ready_msg = effect.ready()
 				if ready and (not effect.is_timed or (effect.is_timed and (cc_running_effects[effect.code] == nil))) then
+					local sender = msg["viewer"]
 					local quantity = msg["quantity"]
 					if (quantity == nil) or (quantity == 0) then
 						quantity = 1
 					end
-					local result, out_msg = effect.update(0, quantity, msg["parameters"]) -- parameters may be nil
+					local result, out_msg = effect.update(0, quantity, msg["parameters"], sender) -- parameters may be nil
 					if result == nil then
 						result = CCEffectResponse.SUCCESS
 					end

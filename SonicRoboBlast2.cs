@@ -52,6 +52,11 @@ class SonicRoboBlast2 : FileEffectPack
                 {
                     Price = 50, Category = "Enemies", Description = "Spawns a Crawla Commander around the player."
                 },
+                new Effect("Spawn Fang", "fang")
+                {
+                    Price = 50, Category = "Enemies", 
+                    Description = "Spawns a simplified version of the Fang boss around the player."
+                },
 
                 new Effect("Give Pity Shield", "pityshield")
                     { Price = 10, Category = "Shields", Description = "Grants the player a basic shield." },
@@ -110,7 +115,18 @@ class SonicRoboBlast2 : FileEffectPack
                 {
                     Duration = 15, Price = 5,
                     Description = "Make the player tall for a little while."
-                }
+                },
+                new Effect("Disable Controls & Action Buttons", "qte")
+                {
+                    Price = 25, Category = "Controls",
+                    Description = "Make the player input a QTE before they can continue."
+                },
+                /*new Effect("Disable Textures", "notextures")
+                {
+                    Price = 25, Duration = 30, Category = "Controls", Disabled = true,
+                    Description = "Replace every texture in the game with a flat color"
+                },*/
+                //new Effect("event-hype-train", "event-hype-train") {},
             ];
             return effects;
         }

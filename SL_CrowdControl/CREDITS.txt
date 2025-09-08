@@ -3,3 +3,6 @@ Uses the CustomHud v2.1 by TehRealSalt (file renamed to customhud_v2.1 here)
 Version checker for the libraries originally from TehRealSalt's vectorlib in their Gamma character mod.
 
 SonicPog from Leminn made by Saneko.
+
+QTE Sounds from Sonic Unleashed
+Gamepad axis handling from MRCE Episode Select

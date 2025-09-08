@@ -6,6 +6,9 @@ dofile("util/JSONParser.lua")
 dofile("util/CCEffect.lua")
 dofile("util/CCEmote.lua")
 
+dofile("freeslots.lua")
+dofile("FangClone.lua")
+
 dofile("connection.lua")
 dofile("effects.lua")
 
