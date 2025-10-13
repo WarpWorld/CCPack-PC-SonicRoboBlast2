@@ -18,105 +18,105 @@ class SonicRoboBlast2 : FileEffectPack
         {
             List<Effect> effects =
             [
-                new Effect("Spawn Bumper", "bumper")
+                new("Spawn Bumper", "bumper")
                     { Price = 10, Description = "Spawns a bumper in the player's way." },
-                new Effect("Give Rings", "giverings")
+                new("Give Rings", "giverings")
                     { Price = 1, Quantity = 99, Description = "Give the player some rings." },
-                new Effect("Kill", "kill") { Price = 200, Description = "Take a life from the player." },
-                new Effect("Slap", "slap") { Price = 25, Description = "Give the player a good slap" },
-                new Effect("Give Speedshoes", "sneakers")
+                new("Kill", "kill") { Price = 200, Description = "Take a life from the player." },
+                new("Slap", "slap") { Price = 25, Description = "Give the player a good slap" },
+                new("Give Speedshoes", "sneakers")
                     { Price = 25, Description = "Give the player a pair of speed shoes. Gotta go fast!" },
-                new Effect("Give Invincibility", "invulnerability")
+                new("Give Invincibility", "invulnerability")
                     { Price = 25, Description = "Give the player invincibility. How nice of you." },
 
-                new Effect("Disable Jump", "nojump")
+                new("Disable Jump", "nojump")
                 {
                     Duration = 10, Price = 50, Category = "Controls",
                     Description = "Disables the player's jump button."
                 },
-                new Effect("Disable Spin", "nospin")
+                new("Disable Spin", "nospin")
                 {
                     Duration = 10, Price = 50, Category = "Controls",
                     Description = "Disables the player's spin button."
                 },
-                new Effect("Invert Controls", "invertcontrols")
+                new("Invert Controls", "invertcontrols")
                 {
                     Duration = 15, Price = 50, Category = "Controls", Description = "Inverts the player's controls."
                 },
 
-                new Effect("Spawn Crawla", "crawla")
+                new("Spawn Crawla", "crawla")
                     { Price = 10, Category = "Enemies", Description = "Spawns a Crawla around the player." },
-                new Effect("Spawn Rosy", "rosy")
+                new("Spawn Rosy", "rosy")
                     { Price = 10, Category = "Enemies", Description = "Spawns Amy to hug the player." },
-                new Effect("Spawn Crawla Commander", "commander")
+                new("Spawn Crawla Commander", "commander")
                 {
                     Price = 50, Category = "Enemies", Description = "Spawns a Crawla Commander around the player."
                 },
-                new Effect("Spawn Fang", "fang")
+                new("Spawn Fang", "fang")
                 {
                     Price = 50, Category = "Enemies", 
                     Description = "Spawns a simplified version of the Fang boss around the player."
                 },
 
-                new Effect("Give Pity Shield", "pityshield")
+                new("Give Pity Shield", "pityshield")
                     { Price = 10, Category = "Shields", Description = "Grants the player a basic shield." },
-                new Effect("Give Fire Shield", "fireshield")
+                new("Give Fire Shield", "fireshield")
                     { Price = 10, Category = "Shields", Description = "Grants the player a fire shield." },
-                new Effect("Give Bubble Shield", "bubbleshield")
+                new("Give Bubble Shield", "bubbleshield")
                 {
                     Price = 10, Category = "Shields", Description = "Grants the player a bubble shield. BWAOH"
                 },
-                new Effect("Give Lightning Shield", "lightningshield")
+                new("Give Lightning Shield", "lightningshield")
                 {
                     Price = 10, Category = "Shields", Description = "Grants the player a lightning shield."
                 },
 
-                new Effect("Change to Sonic", "changesonic")
+                new("Change to Sonic", "changesonic")
                     { Price = 10, Category = "Characters", Description = "Sets the player character to Sonic." },
-                new Effect("Change to Tails", "changetails")
+                new("Change to Tails", "changetails")
                     { Price = 10, Category = "Characters", Description = "Sets the player character to Tails." },
-                new Effect("Change to Knuckles", "changeknuckles")
+                new("Change to Knuckles", "changeknuckles")
                 {
                     Price = 10, Category = "Characters", Description = "Sets the player character to Knuckles."
                 },
-                new Effect("Change to Amy", "changeamy")
+                new("Change to Amy", "changeamy")
                     { Price = 10, Category = "Characters", Description = "Sets the player character to Amy." },
-                new Effect("Change to Fang", "changefang")
+                new("Change to Fang", "changefang")
                     { Price = 10, Category = "Characters", Description = "Sets the player character to Fang." },
-                new Effect("Change to Metal Sonic", "changemetal")
+                new("Change to Metal Sonic", "changemetal")
                 {
                     Price = 10, Category = "Characters", Description = "Sets the player character to Metal Sonic."
                 },
-                new Effect("Change to Random Character", "changerandom")
+                new("Change to Random Character", "changerandom")
                 {
                     Price = 10, Category = "Characters",
                     Description = "Sets the player character to a random character."
                 },
-                new Effect("Emote Heart", "emoteheart")
+                new("Emote Heart", "emoteheart")
                 {
                     Price = 1, Category = "Emotes",
                     Description = "Send the player some lovely encouragement."
                 },
-                new Effect("Emote Pog", "emotepog")
+                new("Emote Pog", "emotepog")
                     { Price = 1, Category = "Emotes" },
-                new Effect("Emote No Way", "emotenoway") 
+                new("Emote No Way", "emotenoway") 
                     { Price = 1, Category = "Emotes" },
-                new Effect("Bonus Fang", "bonusfang")
+                new("Bonus Fang", "bonusfang")
                 {
                     Price = 100, Inactive = true,
                     Description = "(Unstable?) Fang takes the player on a little journey."
                 },
-                new Effect("Squish Player", "squish")
+                new("Squish Player", "squish")
                 {
                     Duration = 15, Price = 5,
                     Description = "Squish the player for a little while."
                 },
-                new Effect("Tall Player", "tall")
+                new("Tall Player", "tall")
                 {
                     Duration = 15, Price = 5,
                     Description = "Make the player tall for a little while."
                 },
-                new Effect("Disable Controls & Action Buttons", "qte")
+                new("Disable Controls & Action Buttons", "qte")
                 {
                     Price = 25, Category = "Controls",
                     Description = "Make the player input a QTE before they can continue."
