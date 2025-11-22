@@ -325,6 +325,7 @@ cc_effects["bonusfang"] = CCEffect("bonusfang", function(t)
 		["rings"] = consoleplayer.rings,
 		["score"] = consoleplayer.score,
 		["angle"] = consoleplayer.mo.angle,
+		["eflags"] = consoleplayer.mo.eflags & MFE_VERTICALFLIP
 	}
 	escaped_fang = false
 	G_SetCustomExitVars(15, 2) -- 2 -> skip stats and cutscene
@@ -369,6 +370,16 @@ local qte_buttons = {
 	GC_JUMP, GC_SPIN, GC_FORWARD, GC_BACKWARD, GC_STRAFELEFT, GC_STRAFERIGHT, 
 	GC_WEAPONNEXT, GC_WEAPONPREV, GC_CUSTOM1, GC_CUSTOM2, GC_CUSTOM3,
 }
+local qte_enabled_buttons = {
+	GC_JUMP, GC_SPIN, GC_FORWARD, GC_BACKWARD, GC_STRAFELEFT, GC_STRAFERIGHT
+}
+local cc_qte_buttons = CV_RegisterVar({
+	name = "cc_qte_buttons",
+	defaultvalue = 0,
+	flags = CV_NOTINNET|CV_ALLOWLUA,
+	PossibleValue = CV_Unsigned,
+	func = nil
+})
 local qte_button_patches = {
 	[GC_JUMP] = "JUMPQTE", 
 	[GC_SPIN] = "SPINQTE", 
@@ -388,16 +399,32 @@ local button_dict = {
 local function setup_qte()
 	qte_sequence = {}
 	qte_pos = 1
+	local qte_enabled_buttons = {
+		GC_JUMP, GC_SPIN, GC_FORWARD, GC_BACKWARD, GC_STRAFELEFT, GC_STRAFERIGHT
+	}
+	if cc_qte_buttons.value & 1 != 0 then
+		table.insert(qte_enabled_buttons, GC_WEAPONNEXT)
+		table.insert(qte_enabled_buttons, GC_WEAPONPREV)
+	end
+	if cc_qte_buttons.value & 2 != 0 then
+		table.insert(qte_enabled_buttons, GC_CUSTOM1)
+	end
+	if cc_qte_buttons.value & 4 != 0 then
+		table.insert(qte_enabled_buttons, GC_CUSTOM2)
+	end
+	if cc_qte_buttons.value & 8 != 0 then
+		table.insert(qte_enabled_buttons, GC_CUSTOM3)
+	end
 	local qte_valid_buttons = {
 	}
 	qte_timer = QTE_TIMER_MAX
-	for i=1,#qte_buttons do
-		local bind1, bind2 = input.gameControlToKeyNum(qte_buttons[i])
+	for i=1,#qte_enabled_buttons do
+		local bind1, bind2 = input.gameControlToKeyNum(qte_enabled_buttons[i])
 		if bind1 > 0 then
-			table.insert(qte_valid_buttons, qte_buttons[i])
-			button_dict[bind1] = qte_buttons[i]
+			table.insert(qte_valid_buttons, qte_enabled_buttons[i])
+			button_dict[bind1] = qte_enabled_buttons[i]
 			if bind2 > 0 then
-				button_dict[bind2] = qte_buttons[i]
+				button_dict[bind2] = qte_enabled_buttons[i]
 			end
 		end
 	end
@@ -487,7 +514,10 @@ local function pre_think_frame()
 	if qte_timer > 0 and consoleplayer.playerstate != PST_DEAD then
 		qte_timer = $ - 1
 		if qte_active and qte_timer == 0 then
+			setup_qte()
 			P_DamageMobj(consoleplayer.mo, nil, nil, 1, DMG_INSTAKILL)
+			qte_attempts = 5
+			qte_difficulty = 1
 		end
 	end
     -- The following code is adapted from MRCE's Episode Select
@@ -617,6 +647,7 @@ local function on_map_loaded(mapnum)
 		consoleplayer.starpostangle = bonusfang_returnvector.starpost_angle
 		consoleplayer.starposttime = bonusfang_returnvector.starpost_time
 		consoleplayer.starpostnum = bonusfang_returnvector.starpost_num
+		consoleplayer.mo.eflags |= bonusfang_returnvector.eflags
 		escaped_fang = false
 		bonusfang_returnvector = nil
 	end

@@ -23,6 +23,10 @@ local function drawDeathCounter(drawer, player, cam)
 		return --not fully inited
 	end
 	
+	if maptol & TOL_NIGHTS != 0 then
+		return
+	end
+	
 	local livehud = hudinfo[HUD_LIVES]
 	local frac_x, frac_y = livehud.x << FRACBITS, livehud.y << FRACBITS
 	local livesback = drawer.cachePatch("STLIVEBK")
