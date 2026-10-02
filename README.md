@@ -1,5 +1,11 @@
 # Sonic Robo Blast 2
 
+## Pack metadata
+
+- **Game:** Sonic Robo Blast 2
+- **Crowd Control game ID:** `SonicRoboBlast2`
+- **Connector:** `FileConnector`
+
 This pack connects Crowd Control to **Sonic Robo Blast 2** through the bundled
 `SL_CrowdControl.pk3` Lua mod. It uses a file-based connector rather than a
 network socket.
